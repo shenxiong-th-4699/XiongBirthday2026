@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HBD XIONG 2026 — CSR เลี้ยงอุปการะหมี 🐻💖</title>
+  <meta name="description" content="ร่วมโดเนทเลี้ยงอุปการะหมีที่สวนสัตว์เปิดเขาเขียว เพื่อวันเกิด XIONG วง NexT1DE — ทุก 296 บาท = อาหารน้องหมี 1 กรัม" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-10l" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
+</head>
+<body data-page="home">
+
+  <!-- Sticky top bar -->
+  <header class="site-topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="logo">🐻</div>
+        <div>
+          <div>HBD XIONG <span style="color: var(--pink-500)">2026</span></div>
+          <div class="brand-sub">CSR เลี้ยงอุปการะหมี</div>
+        </div>
+      </a>
+      <nav class="nav">
+        <a href="index.html">หน้าหลัก</a>
+        <a href="#how">วิธีร่วมโดเนท</a>
+        <a class="btn btn-primary btn-sm" href="donate.html">แจ้งโดเนท 💌</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <main class="layout">
+
+      <!-- ========== Row 1: Stats (left) + Wall of Love (right) ========== -->
+      <div class="stats-row">
+
+        <!-- Stats card -->
+        <section class="card stats-combined o-stats">
+          <div class="stats-head">
+            <span class="chip-soft">ยอดสะสมรวม</span>
+            <span class="chip-soft chip-orange" id="deadline-chip">⏰ หมดเขต —</span>
+          </div>
+
+          <!-- Progress section (dark, centered) -->
+          <div class="stats-section section-progress">
+            <div class="total-amount" id="total-amount">฿0</div>
+            <div class="total-meta">
+              เป้า <strong id="goal-amount">฿0</strong> · <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress"><span id="progress-bar"></span></div>
+          </div>
+
+          <!-- Countdown section -->
+          <div class="stats-section section-countdown">
+            <div class="section-cap">เหลือเวลา</div>
+            <div class="countdown" id="countdown">
+              <div class="cd-cell"><div class="num">--</div><span class="lab">วัน</span></div>
+              <div class="cd-cell"><div class="num">--</div><span class="lab">ชม.</span></div>
+              <div class="cd-cell"><div class="num">--</div><span class="lab">นาที</span></div>
+              <div class="cd-cell"><div class="num">--</div><span class="lab">วินาที</span></div>
+            </div>
+          </div>
+
+          <!-- Bear-food bonus row (small, bottom) -->
+          <div class="milk-bonus" title="ทุก 296 บาท = อาหารน้องหมี 1 กรัม">
+            <div class="milk-icon">🐻</div>
+            <div>
+              ซื้ออาหารให้น้องหมีไปแล้ว <strong id="food-count">0</strong> กรัม
+              <div style="font-size:11px;opacity:.85">ทุก 296 บาท = อาหาร 1 กรัม</div>
+            </div>
+          </div>
+
+          <div class="stat-cta-row">
+            <a class="btn btn-primary" href="donate.html">ร่วมโดเนท 💌</a>
+            <a class="btn btn-ghost" href="#donations">ยอดโดเนท</a>
+          </div>
+        </section>
+
+        <!-- Wall of Love -->
+        <section class="card wall-card o-wall" id="donations">
+          <div class="wall-head">
+            <h2>Wall of Love</h2>
+            <span class="wall-count" id="wall-count">— รายการ</span>
+          </div>
+          <ul class="donor-list" id="donor-list"></ul>
+          <div class="pager" id="wall-pager">
+            <button class="pager-btn pager-prev" id="wall-prev" type="button" aria-label="ก่อนหน้า">←</button>
+            <span class="pager-info" id="wall-info">—</span>
+            <button class="pager-btn pager-next" id="wall-next" type="button" aria-label="ถัดไป">→</button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ========== Hero ========== -->
+      <section class="hero o-hero">
+        <div class="hero-content">
+          <div class="meta">
+            <span class="chip" id="hashtag-chip">#HBDXIONG2026</span>
+            <span class="chip">🎂 29 มิถุนายน 2026</span>
+            <span class="chip" id="location-chip">📍 สวนสัตว์เปิดเขาเขียว</span>
+          </div>
+          <h1>
+            ของขวัญวันเกิด <span class="highlight">XIONG</span><br/>
+            คือ <span class="highlight">น้องหมี</span> ที่ได้รับการดูแล 💖
+          </h1>
+          <p class="subtitle">
+            ร่วมเป็นส่วนหนึ่งของโครงการเลี้ยงอุปการะหมีที่บางละมุง
+            ในนามแฟนคลับ XIONG วง NexT1DE — ทุกบาทถูกส่งต่อให้น้องหมีจริง 🐾
+          </p>
+          <div class="actions hero-actions">
+            <a class="btn btn-primary" href="donate.html">แจ้งโดเนท</a>
+            <a class="btn btn-ghost" href="#how">ดูวิธีโดเนท</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">🐻💕</div>
+      </section>
+
+      <!-- ========== How + About ========== -->
+      <section class="grid-2 o-info">
+        <div class="card" id="how">
+          <h2>วิธีร่วมโดเนท</h2>
+          <p class="card-sub">ขั้นตอนง่าย ๆ 4 ขั้นตอน</p>
+          <ol class="how-steps">
+            <li>
+              <span class="step-title">เชื่อมต่อบัญชี X</span>
+              <span class="step-desc">เพื่อยืนยันตัวตนและบันทึกยอดสะสมของบัญชีคุณ</span>
+            </li>
+            <li>
+              <span class="step-title">โอนผ่าน PromptPay</span>
+              <span class="step-desc">สแกน QR หรือคัดลอกเลขบัญชีเพื่อโอนเงิน</span>
+            </li>
+            <li>
+              <span class="step-title">แนบสลิป</span>
+              <span class="step-desc">ระบบจะอ่านยอดให้อัตโนมัติ ไม่ต้องกรอกเอง</span>
+            </li>
+            <li>
+              <span class="step-title">รอน้องหมีได้รับอาหาร</span>
+              <span class="step-desc">ทีมงานจะรวมยอดและส่งให้สวนสัตว์ภายในวันที่ <strong>29 มิถุนายน 2026</strong></span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>เกี่ยวกับโครงการ 🐾</h2>
+          <p class="card-sub">CSR เลี้ยงอุปการะหมี · สวนสัตว์เปิดเขาเขียว</p>
+          <p>
+            ในวาระวันเกิดของ <strong>XIONG</strong> วง <strong>NexT1DE</strong>
+            (29 มิถุนายน 2026) แฟนคลับขอชวนทุกคนร่วมเป็น "พ่อแม่อุปการะ" น้องหมี
+            ที่สวนสัตว์เปิดเขาเขียว อ.บางละมุง จ.ชลบุรี
+          </p>
+          <p>
+            <strong>โบนัสกระตุ้นยอด 🐻</strong> — ทุก ๆ 296 บาทที่ทุกคนช่วยกันโดเนทเข้ามา
+            จะถูกแปลงเป็น <strong>อาหารน้องหมี 1 กรัม</strong> ที่ส่งมอบให้สวนสัตว์
+          </p>
+          <p class="muted">
+            ยอดทั้งหมดจะนำส่งสวนสัตว์ในนาม "แฟนคลับ XIONG @ NexT1DE"
+            พร้อมประกาศหลักฐาน + จำนวนอาหารที่ส่งมอบหลังวันที่ 29 มิ.ย. 2026
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <div>Made with 🐻 + 💖 by <strong>ShenXiongThailand</strong></div>
+      <div class="footer-links">
+        <a href="https://x.com/ShenXiongThailand" target="_blank" rel="noopener">𝕏 ShenXiongThailand</a>
+        <span class="footer-dot">·</span>
+        <a href="https://line.me/ti/g2/EDITME" target="_blank" rel="noopener">💬 OpenChat บน LINE</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="config.js?v=2026-05-10l"></script>
+  <script src="app.js?v=2026-05-10l"></script>
+</body>
+</html>

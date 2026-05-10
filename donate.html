@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>แจ้งโดเนท · HBD XIONG 2026 🐻</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-10l" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
+</head>
+<body data-page="donate">
+
+  <!-- Sticky top bar -->
+  <header class="site-topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="logo">🐻</div>
+        <div>
+          <div>HBD XIONG <span style="color: var(--pink-500)">2026</span></div>
+          <div class="brand-sub">แจ้งโดเนท · 3 ขั้นตอน</div>
+        </div>
+      </a>
+      <nav class="nav">
+        <a href="index.html">← กลับหน้าหลัก</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container narrow">
+
+    <!-- Wizard step indicator -->
+    <div class="steps" id="wizard-steps">
+      <div class="step-progress" id="wizard-progress"></div>
+      <div class="step active"><span class="num">1</span><span class="step-label">เชื่อม X</span></div>
+      <div class="step"><span class="num">2</span><span class="step-label">ช่องทางโอน</span></div>
+      <div class="step"><span class="num">3</span><span class="step-label">แนบสลิป</span></div>
+    </div>
+
+    <!-- ========== STEP 1: X Login ========== -->
+    <section class="panel active">
+      <div class="card">
+        <h2>เข้าสู่ระบบด้วย X</h2>
+        <p class="card-sub">เพื่อยืนยันว่าคุณคือใคร และใช้สำหรับนับยอดสะสมของบัญชีคุณ</p>
+
+        <div class="x-login-card">
+          <div class="x-logo">𝕏</div>
+          <h3 style="margin:6px 0;font-family:var(--font-cute)">เชื่อมต่อบัญชี X</h3>
+          <p class="muted" style="margin-top:0">เราจะดึง handle และชื่อบัญชีของคุณมาเพื่อยืนยันการโดเนท</p>
+
+          <button id="x-login-btn" type="button" class="btn btn-x" style="margin-top:14px">
+            <span style="font-size:18px">𝕏</span> เข้าสู่ระบบด้วย X
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STEP 2: Payment ========== -->
+    <section class="panel">
+      <div class="card">
+        <h2 style="text-align:center">ช่องทางการโอน</h2>
+
+        <!-- Profile bar (full-width + logout) -->
+        <div class="profile-bar">
+          <div class="x-profile big" id="x-profile-step2">
+            <div class="avatar">X</div>
+            <div class="who">
+              <span class="name">—</span>
+              <span class="handle">—</span>
+            </div>
+            <button id="logout-step2" type="button" class="logout-btn" title="กลับไปเข้าสู่ระบบใหม่">
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+
+        <!-- Two-column grid (QR left, bank info right) -->
+        <div class="step2-grid">
+
+          <!-- LEFT: QR -->
+          <div class="step2-left">
+            <div class="qr-clean">
+              <img id="qr-img" src="assets/qr_promptpay.png" alt="QR PromptPay" />
+            </div>
+            <div class="qr-tip">
+              💡 ทุก <strong>29 บาท</strong> = อาหารน้องหมี <strong>1 กรัม</strong>
+            </div>
+          </div>
+
+          <!-- RIGHT: bank info -->
+          <div class="step2-right">
+            <div class="copy-row">
+              <div>
+                <div class="label">ธนาคาร</div>
+                <div class="value" id="bank-name">—</div>
+              </div>
+            </div>
+
+            <div class="copy-row">
+              <div>
+                <div class="label">ชื่อบัญชี</div>
+                <div class="value" id="bank-account-name">—</div>
+              </div>
+            </div>
+
+            <div class="copy-row">
+              <div>
+                <div class="label">เลขที่บัญชี</div>
+                <div class="value" id="bank-account-number">—</div>
+              </div>
+              <button class="copy-btn" data-copy-target="bank-account-number" type="button">คัดลอก</button>
+            </div>
+
+            <p class="muted" style="font-size:13px;text-align:center;margin:6px 0 0">
+              💡 หลังโอนเสร็จแล้ว กดถัดไปเพื่อแนบสลิป
+            </p>
+          </div>
+
+        </div>
+
+        <div class="actions">
+          <button id="step2-continue" type="button" class="btn btn-primary">ฉันโอนเรียบร้อยแล้ว →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STEP 3: Slip upload + OCR ========== -->
+    <section class="panel">
+      <div class="card">
+        <h2>แนบสลิปการโอน</h2>
+
+        <!-- Profile bar (full-width like Step 2) -->
+        <div class="profile-bar">
+          <div class="x-profile big" id="x-profile-step3">
+            <div class="avatar">X</div>
+            <div class="who">
+              <span class="name">—</span>
+              <span class="handle">—</span>
+            </div>
+            <button id="logout-step3" type="button" class="logout-btn" title="กลับไปเข้าสู่ระบบใหม่">
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3 body: upload box always full width on top; preview + result row below after upload -->
+        <div class="step3-body">
+
+          <!-- Upload box (always full width) -->
+          <label class="file-drop" for="receipt">
+            <div class="file-drop-icon">📎</div>
+            <div class="file-drop-title">คลิกเพื่ออัปโหลดสลิป</div>
+            <div class="file-drop-help">ระบบจะอ่านยอดและรายละเอียดให้อัตโนมัติ</div>
+            <div class="file-meta" id="file-meta">รองรับ jpg, png, pdf</div>
+            <input id="receipt" type="file" accept="image/*,.pdf" />
+          </label>
+
+          <!-- Result row (hidden until upload) — slip preview left, OCR result right, equal heights -->
+          <div class="step3-result-row" id="step3-result-row">
+            <div class="step3-preview">
+              <img id="receipt-preview" class="file-preview" alt="" />
+            </div>
+            <div class="step3-info">
+              <!-- OCR loading -->
+              <div id="slip-loading" class="slip-loading">
+                <span class="spin"></span>
+                <div>กำลังประมวลผลภาพ...</div>
+                <div class="slip-loading-sub">อ่านยอด · ผู้รับ · เวลาโอน</div>
+              </div>
+              <!-- OCR result -->
+              <div id="slip-result" class="slip-result"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Display name (full-width, no hint) -->
+        <div id="displayname-field" class="field displayname-field">
+          <label for="display-name">ชื่อที่แสดงบน Wall of Love</label>
+          <input id="display-name" type="text" maxlength="40" placeholder="ชื่อที่อยากให้แฟนคลับเห็น" />
+        </div>
+
+        <div class="actions">
+          <button id="step3-back" type="button" class="btn btn-ghost">← ย้อนกลับ</button>
+          <button id="step3-continue" type="button" class="btn btn-primary" disabled>ยืนยันการโดเนท</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div>Made with 🐻 + 💖 by <strong>ShenXiongThailand</strong></div>
+      <div class="footer-links">
+        <a href="https://x.com/ShenXiongThailand" target="_blank" rel="noopener">𝕏 ShenXiongThailand</a>
+        <span class="footer-dot">·</span>
+        <a href="https://line.me/ti/g2/EDITME" target="_blank" rel="noopener">💬 OpenChat บน LINE</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="config.js?v=2026-05-10l"></script>
+  <!-- โหลด X auth config (ไฟล์นี้ถูก gitignore) — จะ 404 เงียบ ๆ ถ้ายังไม่มี -->
+  <script src="config.x.staging.js?v=2026-05-10l" onerror="this.remove()"></script>
+  <script src="app.js?v=2026-05-10l"></script>
+</body>
+</html>
