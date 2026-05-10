@@ -127,6 +127,18 @@
     });
   };
 
+  /**
+   * POST /updateDonateStatus
+   * Body: { donateID, status }    // status: "pending" | "approved" | "rejected"
+   * Response: { success:true, message:"...", donateID, new_status }
+   */
+  Api.updateDonateStatus = async function (donateID, status) {
+    return apiFetch("/updateDonateStatus", {
+      method: "POST",
+      body: JSON.stringify({ donateID, status }),
+    });
+  };
+
   /* ---------- External APIs (different endpoints) ---------- */
 
   /**

@@ -72,16 +72,19 @@ function getUserCumulative(handle) {
 /**
  * Wall of Love feed — มาจาก API /getDonationAll เท่านั้น
  * เรียงล่าสุด → เก่า ตาม created_at
+ * กรอง status === "rejected" ออก (ไม่แสดงรายการที่ไม่ผ่าน)
  * ถ้ายังไม่ได้โหลด → []
  */
 function getCommunityFeed() {
   if (!window.__apiDonations || !Array.isArray(window.__apiDonations.data)) return [];
   return window.__apiDonations.data
+    .filter((d) => (d.status || "pending") !== "rejected")
     .map((d) => ({
       id: d.id,
       handle: d.user_id || "",
       displayName: d.donator_name || "ผู้ใจดี",
       amount: Number(d.amount || 0),
+      status: d.status || "pending",
       ts: d.created_at
         ? new Date(Number(d.created_at)).toISOString()
         : (d.transferred_date || new Date().toISOString()),
@@ -406,19 +409,21 @@ function setupWallOfLove() {
     const slice = feed.slice(start, start + pageSize);
 
     list.innerHTML = slice
-      .map(
-        (d) => `
-        <li>
-          <div class="donor-info">
-            <span class="donor-name">${escapeHtml(d.displayName || d.handle)}</span>
-            <span class="donor-handle">${escapeHtml(d.handle)}</span>
-          </div>
-          <div class="donor-meta">
-            <span class="donor-amount">${fmtBaht(d.amount)}</span>
-            <span class="donor-time">${fmtRelativeTime(d.ts)}</span>
-          </div>
-        </li>`
-      )
+      .map((d) => {
+        const status = d.status === "approved" ? "approved" : "pending";
+        const statusText = status === "approved" ? "ตรวจสอบแล้ว" : "รอตรวจสอบ";
+        return `
+          <li>
+            <div class="donor-info">
+              <span class="donor-name">${escapeHtml(d.displayName || d.handle)}</span>
+              <span class="donor-time">${escapeHtml(fmtRelativeTime(d.ts))}</span>
+            </div>
+            <div class="donor-meta">
+              <span class="donor-amount">${fmtBaht(d.amount)}</span>
+              <span class="donor-status status-${status}">${statusText}</span>
+            </div>
+          </li>`;
+      })
       .join("");
 
     if (info) info.textContent = `${page + 1}/${totalPages}`;

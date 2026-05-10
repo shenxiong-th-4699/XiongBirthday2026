@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin · HBD XIONG 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-11d" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
+</head>
+<body data-page="admin">
+
+  <!-- Sticky top bar -->
+  <header class="site-topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <div class="logo">🐻</div>
+        <div>
+          <div>HBD XIONG <span style="color:var(--pink-500)">2026</span></div>
+          <div class="brand-sub">Admin · จัดการโดเนท</div>
+        </div>
+      </a>
+      <nav class="nav">
+        <a href="index.html">← กลับหน้าหลัก</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <main class="layout">
+      <header class="admin-head">
+        <h1 class="admin-title">จัดการโดเนท</h1>
+        <span class="admin-summary">
+          <strong id="stat-total">—</strong>
+          <span class="sep">·</span>
+          <strong id="stat-users">—</strong> คน
+          <span class="sep">·</span>
+          <strong id="stat-items">—</strong> รายการ
+        </span>
+        <button id="admin-refresh" type="button" class="admin-refresh" title="รีเฟรช">↻</button>
+      </header>
+
+      <!-- User cards list -->
+      <section id="admin-list" class="admin-list">
+        <div class="admin-loading">⏳ กำลังโหลด...</div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      Admin Panel · HBD XIONG 2026 · ShenXiongThailand
+    </footer>
+  </div>
+
+  <!-- Image lightbox modal -->
+  <div id="image-modal" class="image-modal" hidden>
+    <div class="image-modal-backdrop" data-close="1"></div>
+    <button type="button" class="image-modal-close" data-close="1" aria-label="ปิด">✕</button>
+    <div class="image-modal-content">
+      <img id="image-modal-img" src="" alt="slip preview" />
+    </div>
+  </div>
+
+  <script src="config.js?v=2026-05-11d"></script>
+  <script src="api.js?v=2026-05-11d"></script>
+  <script src="admin.js?v=2026-05-11d"></script>
+</body>
+</html>

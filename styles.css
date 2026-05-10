@@ -500,17 +500,25 @@ a:hover { text-decoration: underline; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   display: block;
 }
-.donor-list li .donor-handle {
-  color: var(--ink-soft); font-size: 12px;
+.donor-list li .donor-time {
+  color: var(--ink-soft); font-size: 11px;
   display: block;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 2px;
 }
 .donor-list li .donor-meta {
   text-align: right;
   flex-shrink: 0;
 }
 .donor-list li .donor-amount { color: var(--pink-600); font-weight: 700; display: block; }
-.donor-list li .donor-time { color: var(--ink-soft); font-size: 11px; display: block; }
+.donor-list li .donor-status {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.donor-list li .donor-status.status-pending  { color: #d2900a; }
+.donor-list li .donor-status.status-approved { color: #2a8b3c; }
 
 /* Empty state — Wall of Love */
 .donor-list li.donor-empty {
@@ -1923,6 +1931,452 @@ a:hover { text-decoration: underline; }
   .ty-bear { font-size: 64px; }
   .ty-food-flight { left: 80px; right: 80px; }
   .ty-hearts { right: 60px; }
+}
+
+/* ---------- Admin page ---------- */
+.admin-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px 14px;
+  flex-wrap: wrap;
+  margin: 12px 0 16px;
+}
+.admin-title {
+  font-family: var(--font-cute);
+  font-size: clamp(20px, 2.4vw, 24px);
+  margin: 0;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.admin-summary {
+  flex: 1;
+  font-size: 13px;
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.admin-summary strong {
+  font-family: var(--font-cute);
+  color: var(--ink);
+  font-weight: 700;
+}
+.admin-summary strong:first-of-type {
+  color: var(--orange-600);
+  font-size: 15px;
+}
+.admin-summary .sep { color: var(--pink-200); }
+
+.admin-refresh {
+  background: white;
+  border: 1px solid var(--pink-200);
+  color: var(--pink-600);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.admin-refresh:hover {
+  background: var(--pink-50);
+  transform: rotate(180deg);
+}
+
+/* (admin stats bar + toolbar removed — replaced by .admin-summary inline) */
+
+/* ---------- Image lightbox modal ---------- */
+.image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn .2s ease;
+}
+.image-modal[hidden] { display: none !important; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.image-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 10, 25, .9);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  cursor: zoom-out;
+}
+.image-modal-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.image-modal-content img {
+  display: block;
+  /* ขยายเต็ม viewport ให้มากที่สุดโดยรักษา aspect ratio
+     สลิปแนวตั้ง (2:3) บน desktop จะเต็ม 96vh, ไม่ถูก max-width จำกัด */
+  height: 96vh;
+  width: auto;
+  max-width: 96vw;
+  border-radius: 12px;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,.6);
+  background: white;
+  animation: popIn .25s cubic-bezier(.2, 1, .4, 1.05);
+}
+@media (max-width: 720px) {
+  .image-modal-content img {
+    height: auto;
+    width: 96vw;
+    max-height: 96vh;
+  }
+}
+@keyframes popIn {
+  from { transform: scale(.92); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.image-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid; place-items: center;
+  box-shadow: 0 8px 22px -4px rgba(0,0,0,.4);
+  transition: transform .15s, background .15s;
+}
+.image-modal-close:hover {
+  background: var(--pink-50);
+  transform: rotate(90deg);
+}
+
+/* slip click cursor */
+.dn-slip[data-slip-full] { cursor: zoom-in; }
+
+/* List */
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.admin-loading,
+.admin-empty {
+  text-align: center;
+  padding: 40px 16px;
+  color: var(--ink-soft);
+  background: white;
+  border-radius: var(--radius-sm);
+  border: 1.5px dashed var(--line);
+}
+
+/* User card — clearer hierarchy with avatar */
+.admin-user-card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 24px -14px rgba(255, 143, 182, .3);
+  overflow: hidden;
+}
+.admin-user-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, var(--pink-100), var(--orange-100));
+  border-bottom: 2px solid white;
+}
+.admin-avatar {
+  flex-shrink: 0;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--pink-400), var(--orange-400));
+  color: white;
+  display: grid; place-items: center;
+  font-family: var(--font-cute);
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px -4px rgba(255, 143, 182, .55);
+  overflow: hidden;
+}
+.admin-avatar.has-img { background: white; }
+.admin-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.admin-user-name {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 1px;
+}
+.admin-user-name strong {
+  font-family: var(--font-cute);
+  font-size: 16px;
+  color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.admin-user-id {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-family: "JetBrains Mono", "Menlo", monospace;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.admin-user-totals {
+  flex-shrink: 0;
+  text-align: right;
+}
+.admin-user-totals .admin-user-total {
+  font-family: var(--font-cute);
+  font-size: 18px;
+  color: var(--orange-600);
+  font-weight: 700;
+  display: block;
+}
+.admin-user-totals .admin-user-count {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* Donation list inside user card */
+.admin-donation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+}
+
+/* Donation card — slip / content / actions, status badge top-right */
+.admin-donation {
+  position: relative;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px 18px;
+  padding: 16px;
+  background: white;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  transition: border-color .2s;
+}
+/* Pending — เหลืองอ่อน, มี glow ดึงความสนใจ */
+.admin-donation.status-pending {
+  border-color: #F4C97A;
+  background: linear-gradient(135deg, #FFF8E0 0%, white 50%);
+  box-shadow: 0 0 0 3px rgba(244, 201, 122, .15);
+}
+/* Approved — เขียวสด */
+.admin-donation.status-approved {
+  border-color: #5BB770;
+  background: linear-gradient(135deg, #E8F7EB 0%, white 60%);
+}
+/* Rejected — แดงชัด, opacity ลด */
+.admin-donation.status-rejected {
+  border-color: #E08585;
+  background: linear-gradient(135deg, #FFEEEE 0%, white 60%);
+  opacity: .75;
+}
+.admin-donation.status-rejected .dn-amount {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.dn-slip {
+  grid-row: 1 / 4;                 /* spans all 3 rows on right side */
+  display: block;
+  width: 240px;
+  aspect-ratio: 2 / 3;             /* portrait 2:3 (240×360) */
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: white;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  flex-shrink: 0;
+  align-self: start;
+}
+.dn-slip img {
+  width: 100%; height: 100%;
+  object-fit: contain;             /* แสดงสลิปเต็มรูป ไม่ crop เพื่อตรวจง่าย */
+  background: white;
+  display: block;
+  transition: transform .25s ease;
+}
+.dn-slip:hover img { transform: scale(1.04); }
+.dn-slip.no-image {
+  display: grid; place-items: center;
+  font-size: 56px;
+  color: var(--ink-soft);
+}
+
+/* Right side cells alignment for 3-row grid */
+.admin-donation .dn-main { grid-row: 1; align-self: start; }
+.admin-donation .dn-actions { grid-row: 3; align-self: end; }
+
+.dn-main {
+  min-width: 0;
+  padding-right: 100px;          /* เว้นที่ให้ status badge */
+}
+.dn-amount {
+  font-family: var(--font-cute);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--orange-600);
+  line-height: 1.1;
+}
+.dn-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 8px;
+}
+.dn-meta .bank-tag {
+  background: white;
+  border: 1px solid var(--line);
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 10px;
+}
+.dn-sender {
+  font-size: 12px;
+  color: var(--pink-600);
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* Status badge — absolute top-right */
+.admin-donation .status-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1.5px solid;
+  white-space: nowrap;
+}
+.admin-donation .status-badge.status-pending {
+  background: #FFF3D9;
+  border-color: #F4C97A;
+  color: #b97800;
+}
+.admin-donation .status-badge.status-approved {
+  background: #DEF5E2;
+  border-color: #5BB770;
+  color: #1f6e2c;
+}
+.admin-donation .status-badge.status-rejected {
+  background: #FFE0E0;
+  border-color: #E08585;
+  color: #8b1f1f;
+}
+
+/* Action buttons row — ใต้ content, ขวาล่าง */
+.dn-actions {
+  grid-column: 2 / -1;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .admin-donation {
+    grid-template-columns: 160px 1fr;
+    padding: 12px;
+    gap: 10px 14px;
+  }
+  .dn-slip {
+    width: 160px;
+    aspect-ratio: 2 / 3;            /* 160×240 */
+    height: auto;
+  }
+  .dn-main { padding-right: 96px; }
+  .dn-amount { font-size: 20px; }
+  .admin-donation .status-badge {
+    top: 8px; right: 8px;
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+}
+@media (max-width: 460px) {
+  .admin-donation { grid-template-columns: 110px 1fr; }
+  .dn-slip { width: 110px; height: auto; }   /* 110×165 */
+  .dn-slip.no-image { font-size: 36px; }
+  .dn-main { padding-right: 80px; }
+}
+
+.btn-mini {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  cursor: pointer;
+  background: white;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-mini:disabled { opacity: .4; cursor: not-allowed; }
+.btn-mini-approve {
+  border-color: #2a8b3c;
+  color: #2a8b3c;
+}
+.btn-mini-approve:hover:not(:disabled) {
+  background: #2a8b3c;
+  color: white;
+}
+.btn-mini-reject {
+  border-color: #b23434;
+  color: #b23434;
+}
+.btn-mini-reject:hover:not(:disabled) {
+  background: #b23434;
+  color: white;
+}
+
+/* Status badge */
+.status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.status-badge.status-pending {
+  background: #FFF3D9;
+  color: #d2900a;
+}
+.status-badge.status-approved {
+  background: #DEF5E2;
+  color: #2a8b3c;
+}
+.status-badge.status-rejected {
+  background: #FFE0E0;
+  color: #b23434;
+}
+
+@media (max-width: 720px) {
+  .admin-donation { flex-direction: column; align-items: stretch; }
+  .dn-side { justify-content: space-between; }
 }
 
 /* ---------- Responsive ---------- */
