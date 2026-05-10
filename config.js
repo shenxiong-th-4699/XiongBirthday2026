@@ -51,20 +51,63 @@ const APP_CONFIG = {
   },
 
   // ----- Auth strategy -----
-  // โหมดที่ใช้สำหรับ "เข้าสู่ระบบด้วย X"
-  //   "mock"  — สุ่ม handle ทดสอบสำหรับ dev (default)
-  //   "real"  — ใช้ค่าจาก window.X_AUTH_CONFIG (โหลด config.x.<env>.js)
+  //   "mock"     — สุ่ม handle ทดสอบ (offline dev)
+  //   "firebase" — login จริงผ่าน Firebase Auth Twitter provider
+  //
+  // Firebase Auth Twitter provider ใช้ OAuth 1.0a:
+  //   - Consumer Key/Secret ตั้งใน Firebase Console → Authentication → Twitter
+  //
+  // ส่วน OAuth 2.0 creds ด้านล่างนี้ "ไม่ได้ถูกใช้" ในโค้ดปัจจุบัน — เก็บไว้
+  // เผื่ออนาคตอยากทำ OAuth 2.0 PKCE flow โดยไม่ผ่าน Firebase Auth
   auth: {
     provider: "x",
-    mode: "mock",
+    mode: "firebase",
+    oauth2: {
+      clientId: "cS1iY0trZDB0S2pqVnVaclRtNGE6MTpjaQ",
+      clientSecret: "VHsWl936xPG5ug6-ZEBuAF7Yl9V9irjC0FWO9RcK-TcTglkbQv",
+    },
   },
 
-  // ----- Slip OCR API -----
-  // โหมด mock จะสุ่มข้อมูลให้ — เปลี่ยน mode เป็น "real" + ใส่ endpoint เพื่อใช้งานจริง
+  // ----- Slip OCR / verification (n8n webhook) -----
+  // POST form-data { image: <file> } → { is_slip, date, bank_code, sender_name,
+  //                                       sender_account, receiver_name, ref_number, amount, currency }
   slipOcr: {
-    mode: "mock",
-    endpoint: "",
-    apiKey: "",
+    endpoint: "https://shenxiong-th.app.n8n.cloud/webhook/6e4a539b-5580-40f9-a85f-47a488a2e842",
+  },
+
+  // ----- Slip image upload to Google Drive (Apps Script web app) -----
+  // POST application/json { imageBlob: "data:image/jpeg;base64,..." } → { success, fileUrl, fileId }
+  slipUpload: {
+    endpoint: "https://script.google.com/macros/s/AKfycbw2DPwpjAYUADzKGSt-K-LUPZl4x8l6LRBdhYviz1DMs1tSrScqzNTirac6PvQ5qiShDw/exec",
+  },
+
+  // ----- Backend API (Firebase Cloud Functions) -----
+  //
+  // env: "auto"        → เลือก localhost/production จาก window.location.hostname
+  //      "localhost"   → บังคับใช้ Functions emulator
+  //      "production"  → บังคับใช้ deployed Cloud Functions
+  //
+  // เพิ่มลิงก์ใน endpoints object ได้ตามต้องการ
+  api: {
+    env: "production",   // ★ ใช้ Functions emulator
+    endpoints: {
+      localhost: "http://127.0.0.1:5001/xiongbirthday2026/us-central1",
+      production: "https://us-central1-xiongbirthday2026.cloudfunctions.net",
+    },
+  },
+
+  // ----- Firebase config (จาก Firebase Console → Project settings) -----
+  // ใช้สำหรับ Firebase Storage (อัปโหลดสลิป) และ services อื่น ๆ ในอนาคต
+  // API 4 เส้นด้านบนเรียกผ่าน HTTP โดยตรง ไม่ต้องใช้ SDK
+  firebase: {
+    apiKey: "AIzaSyBXHqIQri4G0byXMULuMpYSsFVTHLM1-Sw",
+    authDomain: "xiongbirthday2026.firebaseapp.com",
+    databaseURL: "https://xiongbirthday2026-default-rtdb.firebaseio.com",
+    projectId: "xiongbirthday2026",
+    storageBucket: "xiongbirthday2026.firebasestorage.app",
+    messagingSenderId: "955613591827",
+    appId: "1:955613591827:web:20eeedc40793f358eec2e6",
+    measurementId: "G-5CE9V6LMZH",
   },
 
   // ----- Social / Share -----
@@ -78,7 +121,7 @@ const APP_CONFIG = {
   // ----- Organization / footer credit -----
   org: {
     name: "ShenXiongThailand",
-    xUrl:    "https://x.com/ShenXiongThailand",
+    xUrl: "https://x.com/ShenXiongThailand",
     xHandle: "@ShenXiongThailand",
     lineOpenChat: "https://line.me/ti/g2/EDITME",   // ใส่ลิงก์ OpenChat จริงตรงนี้
   },
@@ -86,34 +129,6 @@ const APP_CONFIG = {
   // ----- Wall of Love settings -----
   wallOfLove: {
     pageSize: 5,
-  },
-
-  // ----- ข้อมูลเริ่มต้น (จะรวมเข้ากับยอดที่กำลังเข้ามาเรื่อย ๆ) -----
-  seed: {
-    // ยอดเริ่มต้นรวม (ก่อนรวมกับ entries ด้านล่าง)
-    baseTotal: 0,
-    baseDonors: 0,
-    // รายการการโดเนทที่บันทึกไว้แล้ว (ใช้แสดงบน Wall of Love)
-    donations: [
-      { handle: "@xiongbear",   displayName: "Xiong Bear 🐻",     amount: 590, ts: "2026-05-09T20:14:00+07:00" },
-      { handle: "@n1dehoney",   displayName: "Honey 🍯",          amount: 329, ts: "2026-05-09T18:42:00+07:00" },
-      { handle: "@bearbiscuit", displayName: "Bear Biscuit 🍪",   amount: 290, ts: "2026-05-09T15:08:00+07:00" },
-      { handle: "@miniXiong",   displayName: "miniXiong",         amount: 250, ts: "2026-05-09T11:35:00+07:00" },
-      { handle: "@blueberry_xx",displayName: "BCubcake 🐻",       amount: 296, ts: "2026-05-09T09:21:00+07:00" },
-      { handle: "@n1de_fan",    displayName: "Berry 🫐",          amount: 200, ts: "2026-05-08T22:50:00+07:00" },
-      { handle: "@cubcube",     displayName: "Lulu 🐰",           amount: 129, ts: "2026-05-08T20:02:00+07:00" },
-      { handle: "@petitbear",   displayName: "Mochi 🌸",          amount: 500, ts: "2026-05-08T16:18:00+07:00" },
-      { handle: "@miniN1DE",    displayName: "Mintie 🌼",         amount: 296, ts: "2026-05-08T13:44:00+07:00" },
-      { handle: "@softpaw_x",   displayName: "Peach 🍑",          amount: 100, ts: "2026-05-08T10:12:00+07:00" },
-      { handle: "@honey_x",     displayName: "Honey x",           amount: 320, ts: "2026-05-07T21:39:00+07:00" },
-      { handle: "@chocobear",   displayName: "Choco Bear 🍫",     amount: 150, ts: "2026-05-07T18:55:00+07:00" },
-      { handle: "@_pearbear",   displayName: "Pear 🍐",           amount: 50,  ts: "2026-05-07T15:21:00+07:00" },
-      { handle: "@strawbear",   displayName: "Straw 🍓",          amount: 80,  ts: "2026-05-07T11:48:00+07:00" },
-      { handle: "@nexbear",     displayName: "NexBear",           amount: 200, ts: "2026-05-06T22:05:00+07:00" },
-      { handle: "@xiong_oppa",  displayName: "ป้าตือ ปฐพีXIONG",   amount: 600, ts: "2026-05-06T19:33:00+07:00" },
-      { handle: "@bbcubz",      displayName: "BB Cubz",           amount: 100, ts: "2026-05-06T14:20:00+07:00" },
-      { handle: "@deerbear_x",  displayName: "Deer 🦌",           amount: 200, ts: "2026-05-05T23:02:00+07:00" },
-    ],
   },
 };
 

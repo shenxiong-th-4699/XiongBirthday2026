@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2026-05-10l" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-10u" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
 </head>
 <body data-page="donate">
@@ -33,7 +33,7 @@
     <!-- Wizard step indicator -->
     <div class="steps" id="wizard-steps">
       <div class="step-progress" id="wizard-progress"></div>
-      <div class="step active"><span class="num">1</span><span class="step-label">เชื่อม X</span></div>
+      <div class="step active"><span class="num">1</span><span class="step-label">ระบุตัวตน</span></div>
       <div class="step"><span class="num">2</span><span class="step-label">ช่องทางโอน</span></div>
       <div class="step"><span class="num">3</span><span class="step-label">แนบสลิป</span></div>
     </div>
@@ -52,6 +52,29 @@
           <button id="x-login-btn" type="button" class="btn btn-x" style="margin-top:14px">
             <span style="font-size:18px">𝕏</span> เข้าสู่ระบบด้วย X
           </button>
+
+          <!-- Collapsible: เผื่อ X ใช้ไม่ได้ → ขยายมาให้กรอก @account เอง -->
+          <button id="manual-toggle-btn" type="button" class="manual-toggle-btn">
+            ไม่สามารถเข้าสู่ระบบได้?
+          </button>
+
+          <div id="manual-section" class="manual-section" hidden>
+            <p class="muted" style="margin:0 0 8px;font-size:12px">
+              พิมพ์ @account ของคุณเพื่อยืนยันตัวตน
+            </p>
+            <form id="manual-handle-form" class="manual-input-row" autocomplete="off">
+              <input id="manual-handle"
+                     type="text"
+                     placeholder="@account"
+                     maxlength="20"
+                     inputmode="text"
+                     autocapitalize="off"
+                     spellcheck="false" />
+              <button id="manual-handle-btn" type="submit" class="btn btn-ghost btn-sm">
+                ดำเนินการต่อ →
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </section>
@@ -198,9 +221,13 @@
     </footer>
   </div>
 
-  <script src="config.js?v=2026-05-10l"></script>
+  <!-- Firebase SDK (compat) — for Auth + Storage -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="config.js?v=2026-05-10u"></script>
   <!-- โหลด X auth config (ไฟล์นี้ถูก gitignore) — จะ 404 เงียบ ๆ ถ้ายังไม่มี -->
-  <script src="config.x.staging.js?v=2026-05-10l" onerror="this.remove()"></script>
-  <script src="app.js?v=2026-05-10l"></script>
+  <script src="config.x.staging.js?v=2026-05-10u" onerror="this.remove()"></script>
+  <script src="api.js?v=2026-05-10u"></script>
+  <script src="app.js?v=2026-05-10u"></script>
 </body>
 </html>

@@ -70,53 +70,60 @@ function getUserCumulative(handle) {
 }
 
 /**
- * รวมการโดเนททั้งหมดเป็น "feed" สำหรับ Wall of Love
- * - seed entries จาก config.seed.donations
- * - + entries ที่ผู้ใช้บันทึกผ่านหน้า donate
- * เรียงตามเวลาล่าสุด → เก่า
+ * Wall of Love feed — มาจาก API /getDonationAll เท่านั้น
+ * เรียงล่าสุด → เก่า ตาม created_at
+ * ถ้ายังไม่ได้โหลด → []
  */
 function getCommunityFeed() {
-  const seed = (APP_CONFIG.seed?.donations || []).map((d) => ({
-    handle: d.handle,
-    displayName: d.displayName || d.handle,
-    amount: Number(d.amount || 0),
-    ts: d.ts,
-  }));
-
-  const userEntries = [];
-  const all = getAllDonations();
-  for (const handle of Object.keys(all)) {
-    for (const d of all[handle]) {
-      userEntries.push({
-        handle,
-        displayName: d.displayName || d.name || handle,
-        amount: Number(d.amount || 0),
-        ts: d.ts,
-      });
-    }
-  }
-
-  const merged = seed.concat(userEntries);
-  // เรียงล่าสุด → เก่า
-  merged.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
-  return merged;
+  if (!window.__apiDonations || !Array.isArray(window.__apiDonations.data)) return [];
+  return window.__apiDonations.data
+    .map((d) => ({
+      id: d.id,
+      handle: d.user_id || "",
+      displayName: d.donator_name || "ผู้ใจดี",
+      amount: Number(d.amount || 0),
+      ts: d.created_at
+        ? new Date(Number(d.created_at)).toISOString()
+        : (d.transferred_date || new Date().toISOString()),
+      bank: d.bank,
+      refCode: d.ref_code,
+    }))
+    .sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 }
 
+/** ยอดสะสมรวม — จาก API เท่านั้น (ถ้ายังไม่โหลด → 0) */
 function getCommunityTotal() {
-  const base = APP_CONFIG.seed?.baseTotal || 0;
-  return base + getCommunityFeed().reduce((a, d) => a + d.amount, 0);
+  if (window.__apiDonations && typeof window.__apiDonations.grand_total === "number") {
+    return window.__apiDonations.grand_total;
+  }
+  return 0;
 }
 
+/** จำนวนบัญชีที่ร่วมโดเนท — นับจาก unique user_id ใน API */
 function getDonorCount() {
-  const base = APP_CONFIG.seed?.baseDonors || 0;
-  const handles = new Set(getCommunityFeed().map((d) => d.handle));
-  return base + handles.size;
+  if (!window.__apiDonations || !Array.isArray(window.__apiDonations.data)) return 0;
+  const ids = new Set(window.__apiDonations.data.map((d) => d.user_id).filter(Boolean));
+  return ids.size;
+}
+
+/** ข้อมูลโหลดเสร็จแล้วหรือยัง */
+function isCommunityLoaded() {
+  return !!window.__apiDonations;
 }
 
 /* ---------- Bear-food helper (bonus motivator) ---------- */
 function calcBearFood(amount) {
   const per = APP_CONFIG.donation.bahtPerFood || APP_CONFIG.donation.bahtPerMilk || 296;
   return Math.floor(amount / per);
+}
+
+/* ---------- Firebase init (one-shot) ---------- */
+function ensureFirebase() {
+  if (typeof firebase === "undefined") return null;
+  if (!firebase.apps || !firebase.apps.length) {
+    if (APP_CONFIG.firebase) firebase.initializeApp(APP_CONFIG.firebase);
+  }
+  return firebase;
 }
 
 /* ---------- X (Twitter) auth ---------- */
@@ -128,6 +135,11 @@ function setCurrentUser(u) {
 }
 function clearCurrentUser() {
   localStorage.removeItem(STORAGE_KEYS.user);
+  // ออกจาก Firebase Auth ด้วย (best effort)
+  try {
+    const fb = ensureFirebase();
+    if (fb && fb.auth) fb.auth().signOut();
+  } catch {}
 }
 
 const SAMPLE_USERS = [
@@ -153,35 +165,116 @@ function mockXLogin() {
   return user;
 }
 
+/** map Firebase auth result → user object ภายใน */
+function mapFirebaseAuthResult(result) {
+  const info = result.additionalUserInfo || {};
+  const profile = info.profile || {};
+  const u = result.user;
+  const photoUrl = (u.photoURL || profile.profile_image_url_https || "")
+    .replace(/_normal\./, ".");
+  return {
+    handle: "@" + (info.username || profile.screen_name || ""),
+    name: u.displayName || profile.name || "",
+    avatarUrl: photoUrl,
+    avatarEmoji: "",
+    twitterId: profile.id_str || (profile.id != null ? String(profile.id) : "") || u.uid,
+  };
+}
+
+function describeAuthError(err) {
+  if (!err || !err.code) return "เข้าสู่ระบบ X ไม่สำเร็จ";
+  switch (err.code) {
+    case "auth/popup-closed-by-user":
+    case "auth/cancelled-popup-request":
+      return "ยกเลิกการเข้าสู่ระบบ";
+    case "auth/popup-blocked":
+      return "เบราว์เซอร์บล็อก popup — โปรดอนุญาตแล้วลองใหม่";
+    case "auth/operation-not-allowed":
+      return "Twitter provider ยังไม่ได้เปิดใน Firebase Console";
+    case "auth/unauthorized-domain":
+      return "โดเมนนี้ไม่ได้อยู่ใน Firebase Authorized domains";
+    case "auth/network-request-failed":
+      return "เครือข่ายมีปัญหา — ลองใหม่อีกครั้ง";
+    default:
+      return "เข้าสู่ระบบ X ไม่สำเร็จ (" + err.code + ")";
+  }
+}
+
+/**
+ * Login จริงผ่าน Firebase Auth Twitter provider
+ *  1) ลอง signInWithPopup ก่อน (เร็ว ไม่ออกจากหน้า)
+ *  2) ถ้า popup ถูกบล็อก/หาย → fallback เป็น signInWithRedirect
+ */
+async function loginWithFirebaseTwitter() {
+  const fb = ensureFirebase();
+  if (!fb || !fb.auth) {
+    console.warn("Firebase SDK not loaded");
+    showToast("ระบบยังโหลดไม่เสร็จ — ลองใหม่อีกครั้ง");
+    return null;
+  }
+  const provider = new fb.auth.TwitterAuthProvider();
+
+  try {
+    const result = await fb.auth().signInWithPopup(provider);
+    return mapFirebaseAuthResult(result);
+  } catch (err) {
+    console.error("Twitter sign-in (popup) failed:", err);
+    const popupBroken =
+      err && (err.code === "auth/popup-blocked" ||
+              err.code === "auth/popup-closed-by-user" ||
+              err.code === "auth/web-storage-unsupported" ||
+              err.code === "auth/operation-not-supported-in-this-environment");
+    if (popupBroken) {
+      // ใช้ redirect แทน — หน้าจะหายไป login ที่ X แล้วกลับมาที่ donate.html
+      try {
+        showToast("กำลังพาไปยังหน้า X...");
+        sessionStorage.setItem("hbd_xiong_pending_login", "1");
+        await fb.auth().signInWithRedirect(provider);
+        return null; // หน้าจะหาย ไม่ return ทัน
+      } catch (e) {
+        console.error("Twitter sign-in (redirect) failed:", e);
+        showToast(describeAuthError(e));
+        return null;
+      }
+    }
+    showToast(describeAuthError(err));
+    return null;
+  }
+}
+
+/**
+ * เช็คว่ามี redirect result กลับมาจาก X หรือไม่ (เรียกตอนหน้าโหลด)
+ * คืน user object ถ้าเจอ, null ถ้าไม่
+ */
+async function consumeRedirectResultIfAny() {
+  const fb = ensureFirebase();
+  if (!fb || !fb.auth) return null;
+  try {
+    const result = await fb.auth().getRedirectResult();
+    if (!result || !result.user) return null;
+    sessionStorage.removeItem("hbd_xiong_pending_login");
+    const u = mapFirebaseAuthResult(result);
+    setCurrentUser(u);
+    return u;
+  } catch (err) {
+    console.error("getRedirectResult failed:", err);
+    sessionStorage.removeItem("hbd_xiong_pending_login");
+    showToast(describeAuthError(err));
+    return null;
+  }
+}
+
 /**
  * เลือก flow login ตามค่า config:
- *   - ถ้า window.X_AUTH_CONFIG มีและ mode === "real" และ APP_CONFIG.auth.mode === "real"
- *     → เด้งไปหน้า OAuth ของ X (ต้องมี backend สำหรับ callback)
- *   - ไม่งั้นใช้ mockXLogin()
+ *   - mode "firebase" → Firebase Auth Twitter provider (จริง)
+ *   - อื่น ๆ           → mockXLogin (ทดสอบ)
  */
-function loginWithX() {
-  try {
-    const xCfg = (typeof window !== "undefined" && window.X_AUTH_CONFIG) || null;
-    const appMode = APP_CONFIG.auth?.mode || "mock";
-    const xMode = xCfg?.mode || "mock";
-
-    if (appMode === "real" && xMode === "real" && xCfg?.oauth2?.clientId) {
-      const cb =
-        xCfg.callbackUrls.local && location.hostname === "localhost"
-          ? xCfg.callbackUrls.local
-          : xCfg.callbackUrls.staging;
-      const url =
-        "https://x.com/i/oauth2/authorize?response_type=code" +
-        "&client_id=" + encodeURIComponent(xCfg.oauth2.clientId) +
-        "&redirect_uri=" + encodeURIComponent(cb) +
-        "&scope=" + encodeURIComponent((xCfg.oauth2.scopes || []).join(" ")) +
-        "&state=" + Math.random().toString(36).slice(2) +
-        "&code_challenge=challenge&code_challenge_method=plain";
-      window.location.href = url;
-      return null;
-    }
-  } catch (err) {
-    console.warn("loginWithX: real flow failed, falling back to mock", err);
+async function loginWithX() {
+  const mode = APP_CONFIG.auth?.mode || "mock";
+  if (mode === "firebase") {
+    const u = await loginWithFirebaseTwitter();
+    if (u) setCurrentUser(u);
+    return u;
   }
   return mockXLogin();
 }
@@ -264,9 +357,48 @@ function setupWallOfLove() {
   const pageSize = APP_CONFIG.wallOfLove?.pageSize || 5;
   let page = 0;
 
+  const pager = document.getElementById("wall-pager");
+
   function render() {
+    const loaded = isCommunityLoaded();
     const feed = getCommunityFeed();
     const total = feed.length;
+
+    // Loading state — กำลังดึงข้อมูลจาก API
+    if (!loaded) {
+      list.innerHTML = `
+        <li class="donor-empty donor-loading">
+          <div class="donor-empty-icon">⏳</div>
+          <div class="donor-empty-text">
+            <span>กำลังโหลดข้อมูล...</span>
+          </div>
+        </li>
+      `;
+      if (countChip) countChip.textContent = "—";
+      if (pager) pager.style.display = "none";
+      return;
+    }
+
+    // Empty state — โหลดแล้วแต่ยังไม่มีข้อมูล
+    if (total === 0) {
+      list.innerHTML = `
+        <li class="donor-empty">
+          <div class="donor-empty-icon">🐻💌</div>
+          <div class="donor-empty-text">
+            <strong>ยังไม่มีการโดเนท</strong>
+            <span>เป็นคนแรกที่ป้อนอาหารน้องหมีกันมั้ย</span>
+          </div>
+          <a class="btn btn-primary btn-sm donor-empty-cta" href="donate.html">
+            แจ้งโดเนท 💌
+          </a>
+        </li>
+      `;
+      if (countChip) countChip.textContent = "0 รายการ";
+      if (pager) pager.style.display = "none";
+      return;
+    }
+
+    if (pager) pager.style.display = "";
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
     page = Math.max(0, Math.min(page, totalPages - 1));
 
@@ -318,82 +450,110 @@ function renderHome() {
   const locChip = document.getElementById("location-chip");
   if (locChip) locChip.textContent = "📍 " + APP_CONFIG.campaign.location;
 
-  // Total + progress
-  const total = getCommunityTotal();
-  const goal = APP_CONFIG.donation.goal;
-  const pct = Math.min(100, (total / goal) * 100);
+  function paintTotals() {
+    const loaded = isCommunityLoaded();
+    const total = getCommunityTotal();
+    const goal = APP_CONFIG.donation.goal;
+    const pct = Math.min(100, (total / goal) * 100);
 
-  const totalEl = document.getElementById("total-amount");
-  if (totalEl) totalEl.textContent = fmtBaht(total);
+    const totalEl = document.getElementById("total-amount");
+    if (totalEl) totalEl.textContent = loaded ? fmtBaht(total) : "—";
 
-  const goalEl = document.getElementById("goal-amount");
-  if (goalEl) goalEl.textContent = fmtBaht(goal);
+    const goalEl = document.getElementById("goal-amount");
+    if (goalEl) goalEl.textContent = fmtBaht(goal);
 
-  const pctEl = document.getElementById("progress-bar");
-  if (pctEl) pctEl.style.width = pct.toFixed(1) + "%";
+    const pctEl = document.getElementById("progress-bar");
+    if (pctEl) pctEl.style.width = (loaded ? pct.toFixed(1) : 0) + "%";
 
-  const pctText = document.getElementById("progress-percent");
-  if (pctText) pctText.textContent = pct.toFixed(1) + "%";
+    const pctText = document.getElementById("progress-percent");
+    if (pctText) pctText.textContent = loaded ? pct.toFixed(1) + "%" : "—";
 
-  // donor count อาจมี/ไม่มีในหน้า (ถูกตัดออกจาก progress section ฉบับใหม่)
-  const donorsEl = document.getElementById("donor-count");
-  if (donorsEl) donorsEl.textContent = fmt(getDonorCount());
+    const donorsEl = document.getElementById("donor-count");
+    if (donorsEl) donorsEl.textContent = loaded ? fmt(getDonorCount()) : "—";
 
-  // Bear-food bonus impact
-  const foodEl = document.getElementById("food-count");
-  if (foodEl) foodEl.textContent = fmt(calcBearFood(total));
+    const foodEl = document.getElementById("food-count");
+    if (foodEl) foodEl.textContent = loaded ? fmt(calcBearFood(total)) : "—";
+  }
 
-  // Wall of Love (with pagination)
+  // ขณะรอ API → แสดงเส้นประ "—"
+  paintTotals();
   setupWallOfLove();
-
-  // Countdown
   startCountdown(document.getElementById("countdown"));
+
+  // ดึงของจริงจาก API
+  if (window.Api && window.Api.isConfigured()) {
+    window.Api.getDonationAll()
+      .then((data) => {
+        window.__apiDonations = data || { grand_total: 0, data: [] };
+        paintTotals();
+        setupWallOfLove();
+      })
+      .catch((err) => {
+        console.warn("getDonationAll failed:", err);
+        // ถือว่าโหลดเสร็จแต่ว่างเปล่า เพื่อให้ UI ไม่ค้างที่ "—"
+        window.__apiDonations = { grand_total: 0, data: [] };
+        paintTotals();
+        setupWallOfLove();
+      });
+  } else {
+    // API ยังไม่ตั้งค่า → ถือว่าว่าง
+    window.__apiDonations = { grand_total: 0, data: [] };
+    paintTotals();
+    setupWallOfLove();
+  }
 }
 
-/* ---------- Slip OCR (mock) ---------- */
+/* ---------- Slip OCR (n8n webhook) ---------- */
+
+/**
+ * แปลง "23/04/2026 20:10:00" → ISO string (สมมุติเป็นเวลา Bangkok)
+ * ถ้า year > 2400 → ถือว่าเป็น พ.ศ. ลบ 543
+ */
+function parseSlipDate(dateStr) {
+  if (!dateStr) return new Date().toISOString();
+  const m = String(dateStr).match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+  if (!m) return new Date().toISOString();
+  const [, dd, mm, yyyy, hh = "00", mi = "00", ss = "00"] = m;
+  let year = Number(yyyy);
+  if (year > 2400) year -= 543;
+  const iso =
+    `${year}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}` +
+    `T${hh.padStart(2, "0")}:${mi.padStart(2, "0")}:${ss.padStart(2, "0")}+07:00`;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+
+/**
+ * เรียก n8n CheckSlip API → ตอบเป็น internal shape ที่ renderSlipResult ใช้
+ */
 async function readSlipWithOcr(file) {
-  const cfg = APP_CONFIG.slipOcr || { mode: "mock" };
-
-  if (cfg.mode === "real" && cfg.endpoint) {
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch(cfg.endpoint, {
-      method: "POST",
-      headers: cfg.apiKey ? { "x-api-key": cfg.apiKey } : {},
-      body: fd,
-    });
-    if (!res.ok) throw new Error("OCR API error " + res.status);
-    return await res.json();
+  if (!window.Api || !window.Api.checkSlip) {
+    return { valid: false, reason: "ระบบยังโหลดไม่เสร็จ — ลองใหม่อีกครั้ง" };
   }
-
-  // ----- Mock mode (จำลอง 3 วินาทีให้ feel เหมือนกำลังประมวลผลภาพจริง) -----
-  await new Promise((r) => setTimeout(r, 3000));
-
-  const isImage = (file.type || "").startsWith("image/");
-  if (!isImage) {
+  try {
+    const r = await window.Api.checkSlip(file);
+    if (!r || r.is_slip === false) {
+      return {
+        valid: false,
+        reason: "ภาพที่แนบไม่ใช่สลิปการโอนเงิน — กรุณาแนบสลิปจริง",
+      };
+    }
     return {
-      valid: false,
-      reason: "ไม่สามารถอ่านสลิปได้ — กรุณาแนบรูปภาพสลิปที่ชัดเจน",
+      valid: true,
+      amount: Number(r.amount || 0),
+      refNo: r.ref_number || "",
+      senderBank: r.bank_code || "",
+      senderName: r.sender_name || "",
+      senderAccount: r.sender_account || "",
+      receiverName: r.receiver_name || APP_CONFIG.payment.bank.accountName,
+      receiverAccount: APP_CONFIG.payment.bank.accountNumber,
+      transferredAt: parseSlipDate(r.date),
+      currency: r.currency || "THB",
     };
+  } catch (err) {
+    console.error("checkSlip API error:", err);
+    return { valid: false, reason: "เกิดข้อผิดพลาดในการตรวจสอบสลิป กรุณาลองใหม่" };
   }
-
-  const amounts = [50, 100, 129, 200, 250, 296, 329, 500, 590, 1000];
-  const amount = amounts[Math.floor(Math.random() * amounts.length)];
-  const refNo = "P" + Math.floor(Math.random() * 1e10).toString().padStart(10, "0");
-  const senderBanks = ["KBANK", "SCB", "KTB", "BBL", "TTB"];
-  const senderBank = senderBanks[Math.floor(Math.random() * senderBanks.length)];
-
-  // Mock: ภาพถูกต้องตลอด (ไม่มี random failure แล้ว)
-
-  return {
-    valid: true,
-    amount,
-    refNo,
-    senderBank,
-    receiverName: APP_CONFIG.payment.bank.accountName,
-    receiverAccount: APP_CONFIG.payment.bank.accountNumber,
-    transferredAt: new Date().toISOString(),
-  };
 }
 
 function renderSlipResult(result) {
@@ -488,30 +648,142 @@ function setupDonatePage() {
     paintProfileEl(document.getElementById("x-profile-step3"), user);
   }
 
-  function handleLogin() {
-    let u;
-    try {
-      u = loginWithX();
-    } catch (err) {
-      console.error("Login failed:", err);
-      showToast("ไม่สามารถเข้าสู่ระบบได้ — ลองใหม่อีกครั้ง");
-      return;
+  /**
+   * Flow ร่วมหลังจากได้ user object แล้ว — ใช้ทั้งกับ login ผ่าน X จริง
+   * และ manual @handle fallback
+   */
+  async function processUserAfterLogin(u, opts = {}) {
+    if (!u) return;
+
+    if (window.Api && window.Api.isConfigured()) {
+      const xId = u.twitterId || (u.handle || "").replace(/^@/, "");
+      const handleNoAt = (u.handle || "").replace(/^@/, "");
+      console.log("[login] checking user x_id =", xId);
+      try {
+        const r = await window.Api.getUserInfoByXid(xId);
+        console.log("[login] getUserInfoByXid →", r);
+
+        const isFound = r && r.success === true && r.data && r.data.user_info;
+        if (isFound) {
+          u.userId = r.data.user_info.user_id;
+          u.cumulativeAmount = Number(r.data.total_donate_amount || 0);
+          console.log("[login] existing user, user_id =", u.userId);
+        } else {
+          // ทุกกรณีที่ไม่ใช่ "found" → ลองสร้าง user ใหม่
+          console.log("[login] user not found → calling saveUser");
+          const saved = await window.Api.saveUser({
+            x_id: xId,
+            username: handleNoAt,
+            account: u.name || handleNoAt,
+            profile_url: u.avatarUrl || "",
+          });
+          console.log("[login] saveUser →", saved);
+          if (saved && saved.success && saved.data) {
+            u.userId = saved.data.user_id;
+            u.cumulativeAmount = 0;
+            console.log("[login] new user created, user_id =", u.userId);
+          } else {
+            console.warn("[login] saveUser returned non-success:", saved);
+          }
+        }
+        setCurrentUser(u);
+      } catch (err) {
+        console.error("[login] user info / save failed:", err);
+        showToast("เชื่อมต่อ backend ไม่ได้ — โดเนทอาจไม่ถูกบันทึก");
+      }
     }
-    if (!u) return; // real flow → redirect ไปแล้ว
+
     paintAllProfiles(u);
     paintPaymentInfo();
-    showToast("เชื่อมต่อบัญชี X สำเร็จ");
+    showToast(opts.toastText || "เชื่อมต่อบัญชี X สำเร็จ");
     gotoStep(1);
   }
 
+  async function handleLogin() {
+    let u;
+    try {
+      u = await loginWithX();
+    } catch (err) {
+      console.error("Login failed:", err);
+      showToast("ไม่สามารถเข้าสู่ระบบได้ — ลองใหม่อีกครั้ง");
+      return false;
+    }
+    if (!u) return false; // user cancelled / popup closed / fallback redirect
+    await processUserAfterLogin(u);
+    return true;
+  }
+
+  /* ---------- Manual @handle fallback ---------- */
+  function cleanHandle(input) {
+    return String(input || "").trim().replace(/^@+/, "").replace(/\s+/g, "");
+  }
+  function isValidHandle(handle) {
+    // X handle rules: 1–15 chars, [A-Za-z0-9_]
+    return /^[A-Za-z0-9_]{1,15}$/.test(handle);
+  }
+  async function handleManualLogin(rawValue) {
+    const handle = cleanHandle(rawValue);
+    if (!isValidHandle(handle)) {
+      showToast("กรอก @account ให้ถูกต้อง (เช่น xiongbear, ห้ามมีช่องว่าง)");
+      return;
+    }
+    const u = {
+      handle: "@" + handle,
+      name: handle,
+      avatarUrl: "",
+      avatarEmoji: "🐻",
+      twitterId: handle,    // ใช้ handle เป็น x_id (ไม่มี Twitter numeric id ตอน manual)
+      isManual: true,
+    };
+    setCurrentUser(u);
+    await processUserAfterLogin(u, { toastText: "ใช้ @" + handle + " เรียบร้อย" });
+  }
+
+  // Toggle collapsible manual section
+  const manualToggleBtn = document.getElementById("manual-toggle-btn");
+  const manualSection = document.getElementById("manual-section");
+  function setManualOpen(open) {
+    if (!manualSection || !manualToggleBtn) return;
+    if (open) {
+      manualSection.removeAttribute("hidden");
+      manualToggleBtn.setAttribute("aria-expanded", "true");
+      // focus input หลัง animation เล็กน้อย
+      setTimeout(() => document.getElementById("manual-handle")?.focus(), 200);
+    } else {
+      manualSection.setAttribute("hidden", "");
+      manualToggleBtn.setAttribute("aria-expanded", "false");
+    }
+  }
+  manualToggleBtn?.addEventListener("click", () => {
+    const isOpen = manualToggleBtn.getAttribute("aria-expanded") === "true";
+    setManualOpen(!isOpen);
+  });
+
   if (loginBtn) {
-    loginBtn.addEventListener("click", (e) => {
+    loginBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      handleLogin();
+      loginBtn.disabled = true;
+      try {
+        const ok = await handleLogin();
+        // ถ้า login ไม่สำเร็จ (user cancel / popup เพี้ยน / etc) → auto-expand manual
+        if (!ok && !getCurrentUser()) setManualOpen(true);
+      }
+      finally { loginBtn.disabled = false; }
     });
   } else {
     console.warn("X login button not found");
   }
+
+  // Manual @handle form — submit by Enter หรือกดปุ่ม
+  const manualForm = document.getElementById("manual-handle-form");
+  const manualInput = document.getElementById("manual-handle");
+  manualForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("manual-handle-btn");
+    if (btn) btn.disabled = true;
+    try { await handleManualLogin(manualInput?.value); }
+    finally { if (btn) btn.disabled = false; }
+  });
 
   // ---- Step 2: Payment info ----
   function paintPaymentInfo() {
@@ -526,6 +798,42 @@ function setupDonatePage() {
     const qr = document.getElementById("qr-img");
     if (qr) qr.src = APP_CONFIG.payment.qrImage;
   }
+
+  // เช็ค redirect-result จาก Firebase (กรณี fallback ใช้ signInWithRedirect)
+  // ทำแบบ async แต่ไม่ block UI
+  (async () => {
+    const pending = sessionStorage.getItem("hbd_xiong_pending_login");
+    if (pending) {
+      const u = await consumeRedirectResultIfAny();
+      if (u) {
+        // ทำต่อให้เหมือนกด login สำเร็จปกติ
+        if (window.Api && window.Api.isConfigured()) {
+          const xId = u.twitterId || (u.handle || "").replace(/^@/, "");
+          const handleNoAt = (u.handle || "").replace(/^@/, "");
+          try {
+            const r = await window.Api.getUserInfoByXid(xId);
+            if (r && r.success && r.data && r.data.user_info) {
+              u.userId = r.data.user_info.user_id;
+              u.cumulativeAmount = Number(r.data.total_donate_amount || 0);
+            } else if (r && r.error_code === "USER_NOT_FOUND") {
+              const saved = await window.Api.saveUser({
+                x_id: xId,
+                username: handleNoAt,
+                account: u.name || handleNoAt,
+                profile_url: u.avatarUrl || "",
+              });
+              if (saved && saved.success && saved.data) u.userId = saved.data.user_id;
+            }
+            setCurrentUser(u);
+          } catch (e) { console.warn(e); }
+        }
+        paintAllProfiles(u);
+        paintPaymentInfo();
+        showToast("เชื่อมต่อบัญชี X สำเร็จ");
+        gotoStep(1);
+      }
+    }
+  })();
 
   // ถ้าเข้าหน้านี้แล้วมี user อยู่แล้ว → กระโดดไป step 2
   const existingUser = getCurrentUser();
@@ -594,7 +902,13 @@ function setupDonatePage() {
 
   const resultRow = document.getElementById("step3-result-row");
 
+  // เก็บ Promise ของการอัปโหลดไป Google Drive ที่กำลังทำงาน
+  // — ยิงคู่ขนานกับ checkSlip ตอนที่ user เลือกไฟล์ → กดยืนยันแล้วใช้ผลได้ทันที
+  let driveUploadPromise = null;
+  let currentChangeId = 0;
+
   receiptInput?.addEventListener("change", async () => {
+    const myId = ++currentChangeId;
     const file = receiptInput.files[0];
     lastSlipResult = null;
     setSubmitEnabled(false);
@@ -605,23 +919,22 @@ function setupDonatePage() {
     displayNameField?.classList.remove("show");
 
     if (!file) {
-      if (receiptPreview) {
-        receiptPreview.removeAttribute("src");
-      }
+      if (receiptPreview) receiptPreview.removeAttribute("src");
       if (fileMeta) fileMeta.textContent = "รองรับ jpg, png, pdf";
       resultRow?.classList.remove("show");
+      driveUploadPromise = null;
       return;
     }
 
-    // มีไฟล์แล้ว → แสดง result row และเริ่ม loading
+    // มีไฟล์แล้ว → เริ่มทั้งสอง API พร้อมกัน
     resultRow?.classList.add("show");
-
     if (fileMeta) fileMeta.textContent = file.name + " · " + Math.round(file.size / 1024) + " KB";
+
     if (receiptPreview) {
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          receiptPreview.src = e.target.result;
+          if (myId === currentChangeId) receiptPreview.src = e.target.result;
         };
         reader.readAsDataURL(file);
       } else {
@@ -629,14 +942,24 @@ function setupDonatePage() {
       }
     }
 
+    // ★ ยิง Drive upload ทันทีแบบ background — ไม่ await
+    //   ใช้ผลตอน user กด "ยืนยันการโดเนท"
+    driveUploadPromise = (window.Api && window.Api.uploadSlipImage)
+      ? window.Api.uploadSlipImage(file).catch((err) => {
+          console.warn("Drive upload failed (best-effort):", err);
+          return null;
+        })
+      : Promise.resolve(null);
+
+    // ขณะเดียวกัน ยิง checkSlip + แสดง loading
     if (slipLoading) slipLoading.classList.add("show");
     try {
       const result = await readSlipWithOcr(file);
+      if (myId !== currentChangeId) return;   // user เปลี่ยนไฟล์ระหว่างรอ
       lastSlipResult = result;
       renderSlipResult(result);
       const ok = !!(result && result.valid);
       setSubmitEnabled(ok);
-
       if (ok) {
         const u = getCurrentUser();
         if (displayNameInput && !displayNameInput.value) {
@@ -645,12 +968,13 @@ function setupDonatePage() {
         displayNameField?.classList.add("show");
       }
     } catch (err) {
+      if (myId !== currentChangeId) return;
       console.error(err);
       lastSlipResult = { valid: false, reason: "เกิดข้อผิดพลาดในการอ่านสลิป กรุณาลองใหม่" };
       renderSlipResult(lastSlipResult);
       setSubmitEnabled(false);
     } finally {
-      if (slipLoading) slipLoading.classList.remove("show");
+      if (myId === currentChangeId && slipLoading) slipLoading.classList.remove("show");
     }
   });
 
@@ -706,7 +1030,7 @@ function setupDonatePage() {
     }
   }
 
-  submitBtn?.addEventListener("click", () => {
+  submitBtn?.addEventListener("click", async () => {
     if (!lastSlipResult || !lastSlipResult.valid) {
       showToast("กรุณาแนบสลิปที่ระบบอ่านได้");
       return;
@@ -716,6 +1040,23 @@ function setupDonatePage() {
 
     const file = receiptInput?.files?.[0];
     const displayName = (displayNameInput?.value || "").trim() || user.name || user.handle;
+    const transferredAt = lastSlipResult.transferredAt || new Date().toISOString();
+
+    submitBtn.disabled = true;
+    const oldText = submitBtn.textContent;
+
+    // ★ รอ Drive upload (ที่ยิงคู่ขนานไปแล้ว) — ส่วนใหญ่จะเสร็จก่อน checkSlip นานแล้ว
+    let slipImageUrl = "";
+    if (driveUploadPromise) {
+      submitBtn.textContent = "กำลังอัปโหลดสลิป...";
+      try {
+        const dr = await driveUploadPromise;
+        if (dr && dr.success) slipImageUrl = dr.fileUrl || dr.fileId || "";
+      } catch (err) {
+        console.warn("Drive upload error (continue without):", err);
+      }
+    }
+
     const pending = {
       handle: user.handle,
       name: user.name,
@@ -723,10 +1064,47 @@ function setupDonatePage() {
       avatarEmoji: user.avatarEmoji,
       amount: lastSlipResult.amount,
       receiptName: file?.name || "slip",
-      ts: lastSlipResult.transferredAt || new Date().toISOString(),
+      ts: transferredAt,
       refNo: lastSlipResult.refNo,
       senderBank: lastSlipResult.senderBank,
+      senderName: lastSlipResult.senderName,
+      senderAccount: lastSlipResult.senderAccount,
+      slipImage: slipImageUrl,
     };
+
+    // ★ บันทึกโดเนทผ่าน Cloud Function /saveDonate
+    if (window.Api && window.Api.isConfigured()) {
+      if (!user.userId) {
+        console.warn("[donate] user.userId missing — saveDonate may fail");
+      }
+      submitBtn.textContent = "กำลังบันทึก...";
+      const payload = {
+        user_id: user.userId || (user.twitterId || user.handle || "").replace(/^@/, ""),
+        donator_name: displayName,
+        amount: lastSlipResult.amount,
+        transferred_date: transferredAt,
+        bank: lastSlipResult.senderBank || "",
+        sender_account: lastSlipResult.senderAccount || "",
+        sender_name: lastSlipResult.senderName || "",
+        ref_code: lastSlipResult.refNo || "",
+        slip_image: slipImageUrl,
+      };
+      console.log("[donate] saveDonate payload:", payload);
+      try {
+        const r = await window.Api.saveDonate(payload);
+        console.log("[donate] saveDonate →", r);
+        if (!r || !r.success) {
+          throw new Error((r && r.message) || "saveDonate failed");
+        }
+      } catch (err) {
+        console.error("[donate] saveDonate failed:", err);
+        showToast("บันทึกไม่สำเร็จ — ลองใหม่อีกครั้ง");
+        submitBtn.disabled = false;
+        submitBtn.textContent = oldText;
+        return;
+      }
+    }
+
     addDonation(user.handle, pending);
     sessionStorage.setItem("hbd_xiong_last", JSON.stringify(pending));
     window.location.href = "thank-you.html";
