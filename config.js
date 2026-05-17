@@ -19,7 +19,7 @@ const APP_CONFIG = {
     birthday: "2026-06-29",
     // เพิ่ม/ลบ hashtag ได้ — จะถูก render เป็น chip หลายอันบนหน้า hero
     hashtags: ["#BearHugsForXIONG2026", "#ShenXiongTH"],
-    hashtag:  "#BearHugsForXIONG2026", // ★ legacy — ใช้สำหรับข้อความแชร์/social
+    hashtag: "#BearHugsForXIONG2026", // ★ legacy — ใช้สำหรับข้อความแชร์/social
   },
 
   campaign: {
@@ -67,7 +67,7 @@ const APP_CONFIG = {
     provider: "x",
     mode: "firebase",
     oauth2: {
-      clientId:     "cS1iY0trZDB0S2pqVnVaclRtNGE6MTpjaQ",
+      clientId: "cS1iY0trZDB0S2pqVnVaclRtNGE6MTpjaQ",
       clientSecret: "VHsWl936xPG5ug6-ZEBuAF7Yl9V9irjC0FWO9RcK-TcTglkbQv",
     },
   },
@@ -93,9 +93,9 @@ const APP_CONFIG = {
   //
   // เพิ่มลิงก์ใน endpoints object ได้ตามต้องการ
   api: {
-    env: "localhost",   // ★ ใช้ Functions emulator
+    env: "production",   // ★ ใช้ Functions emulator
     endpoints: {
-      localhost:  "http://127.0.0.1:5001/xiongbirthday2026/us-central1",
+      localhost: "http://127.0.0.1:5001/xiongbirthday2026/us-central1",
       production: "https://us-central1-xiongbirthday2026.cloudfunctions.net",
     },
   },
@@ -104,14 +104,14 @@ const APP_CONFIG = {
   // ใช้สำหรับ Firebase Storage (อัปโหลดสลิป) และ services อื่น ๆ ในอนาคต
   // API 4 เส้นด้านบนเรียกผ่าน HTTP โดยตรง ไม่ต้องใช้ SDK
   firebase: {
-    apiKey:            "AIzaSyBXHqIQri4G0byXMULuMpYSsFVTHLM1-Sw",
-    authDomain:        "xiongbirthday2026.firebaseapp.com",
-    databaseURL:       "https://xiongbirthday2026-default-rtdb.firebaseio.com",
-    projectId:         "xiongbirthday2026",
-    storageBucket:     "xiongbirthday2026.firebasestorage.app",
+    apiKey: "AIzaSyBXHqIQri4G0byXMULuMpYSsFVTHLM1-Sw",
+    authDomain: "xiongbirthday2026.firebaseapp.com",
+    databaseURL: "https://xiongbirthday2026-default-rtdb.firebaseio.com",
+    projectId: "xiongbirthday2026",
+    storageBucket: "xiongbirthday2026.firebasestorage.app",
     messagingSenderId: "955613591827",
-    appId:             "1:955613591827:web:20eeedc40793f358eec2e6",
-    measurementId:     "G-5CE9V6LMZH",
+    appId: "1:955613591827:web:20eeedc40793f358eec2e6",
+    measurementId: "G-5CE9V6LMZH",
   },
 
   // ----- Social / Share -----
@@ -125,7 +125,7 @@ const APP_CONFIG = {
   // ----- Organization / footer credit -----
   org: {
     name: "ShenXiongThailand",
-    xUrl:    "https://x.com/ShenXiong_TH_fc",
+    xUrl: "https://x.com/ShenXiong_TH_fc",
     xHandle: "@ShenXiong_TH_fc",
   },
 
