@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HBD XIONG 2026 — CSR เลี้ยงอุปการะหมี 🐻💖</title>
-  <meta name="description" content="ร่วมโดเนทเลี้ยงอุปการะหมีที่สวนสัตว์เปิดเขาเขียว เพื่อวันเกิด XIONG วง NexT1DE — ทุก 296 บาท = อาหารน้องหมี 1 กรัม" />
+  <meta name="description" content="ร่วมโดเนทเลี้ยงอุปการะหมีที่สถานีเพาะเลี้ยงสัตว์ป่าบางละมุง เพื่อวันเกิด XIONG วง NexT1DE — ทุก 269 บาท = อาหารน้องหมี 1 กิโล (ประมาณการ)" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2026-05-10z" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-17h" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
 </head>
 <body data-page="home">
@@ -20,7 +20,7 @@
         <div class="logo">🐻</div>
         <div>
           <div>HBD XIONG <span style="color: var(--pink-500)">2026</span></div>
-          <div class="brand-sub">CSR เลี้ยงอุปการะหมี</div>
+          <div class="brand-sub">ShenXiong มาเลี้ยงหมีกัน</div>
         </div>
       </a>
       <nav class="nav">
@@ -49,7 +49,7 @@
           <div class="stats-section section-progress">
             <div class="total-amount" id="total-amount">฿0</div>
             <div class="total-meta">
-              เป้า <strong id="goal-amount">฿0</strong> · <span id="progress-percent">0%</span>
+              เป้าหมาย <strong id="goal-amount">฿0</strong> · <span id="progress-percent">0%</span>
             </div>
             <div class="progress"><span id="progress-bar"></span></div>
           </div>
@@ -66,11 +66,12 @@
           </div>
 
           <!-- Bear-food bonus row (small, bottom) -->
-          <div class="milk-bonus" title="ทุก 296 บาท = อาหารน้องหมี 1 กรัม">
+          <div class="milk-bonus" title="ทุก 269 บาท = อาหารน้องหมี 1 กิโล (ประมาณการ)">
             <div class="milk-icon">🐻</div>
             <div>
-              ซื้ออาหารให้น้องหมีไปแล้ว <strong id="food-count">0</strong> กรัม
-              <div style="font-size:11px;opacity:.85">ทุก 296 บาท = อาหาร 1 กรัม</div>
+              ซื้ออาหารให้น้องหมีไปแล้ว <strong id="food-count">0</strong> กิโล
+              <span style="font-size:11px;opacity:.7">(ประมาณการ)</span>
+              <div style="font-size:11px;opacity:.85">ทุก 269 บาท = อาหาร 1 กิโล</div>
             </div>
           </div>
 
@@ -99,18 +100,30 @@
       <!-- ========== Hero ========== -->
       <section class="hero o-hero">
         <div class="hero-content">
-          <div class="meta">
-            <span class="chip" id="hashtag-chip">#HBDXIONG2026</span>
+          <!-- hashtag chips (JS inject ตรงนี้) -->
+          <div class="meta" id="hashtag-meta"></div>
+          <!-- วันที่ + สถานที่ แยกแถวชัดเจน -->
+          <div class="hero-info-row">
             <span class="chip">🎂 29 มิถุนายน 2026</span>
-            <span class="chip" id="location-chip">📍 สวนสัตว์เปิดเขาเขียว</span>
+            <span class="chip" id="location-chip">📍 สถานีเพาะเลี้ยงสัตว์ป่า บางละมุง</span>
           </div>
           <h1>
             ของขวัญวันเกิด <span class="highlight">XIONG</span><br/>
             คือ <span class="highlight">น้องหมี</span> ที่ได้รับการดูแล 💖
           </h1>
+          <div class="hero-bearcount">
+            <span class="bearcount-num">🐻 <strong id="bear-count">120</strong> ตัว</span>
+            <span class="bearcount-loc">ณ สถานีเพาะเลี้ยงสัตว์ป่า บางละมุง</span>
+          </div>
           <p class="subtitle">
-            ร่วมเป็นส่วนหนึ่งของโครงการเลี้ยงอุปการะหมีที่บางละมุง
-            ในนามแฟนคลับ XIONG วง NexT1DE — ทุกบาทถูกส่งต่อให้น้องหมีจริง 🐾
+            <strong>ร่วมสร้างตำนาน "หมีเลี้ยงหมี"! 🐻✨</strong><br/>
+            เพราะชื่อของเขาคือความอบอุ่น... มาร่วมส่งต่อความรักให้ "น้องหมี" ตัวจริงไปกับพวกเรา 🐾<br/>
+            ในวาระวันเกิดของ <strong>XIONG</strong> วง <strong>NexT1DE</strong> ปีนี้
+            <strong>ShenXiong Thailand</strong> ขอเชิญชวนทุกคนร่วมโปรเจกต์อุปการะหมี
+            ณ สถานีเพาะเลี้ยงสัตว์ป่าบางละมุง เพื่อเป็นทุนค่าอาหารและยารักษาโรค —
+            ทุกบาททุกสตางค์จะถูกส่งต่อเพื่อคุณภาพชีวิตที่ดีของน้องหมีโดยไม่หักค่าใช้จ่าย<br/>
+            มาร่วมเติมเต็มรอยยิ้มและการเติบโตที่ดีให้เหล่าน้องหมี
+            ไปพร้อมกับความรักที่เรามีให้จริง ๆ ด้วยกันนะ! 💖
           </p>
           <div class="actions hero-actions">
             <a class="btn btn-primary" href="donate.html">แจ้งโดเนท</a>
@@ -147,19 +160,25 @@
 
         <div class="card">
           <h2>เกี่ยวกับโครงการ 🐾</h2>
-          <p class="card-sub">CSR เลี้ยงอุปการะหมี · สวนสัตว์เปิดเขาเขียว</p>
+          <p class="card-sub">CSR เลี้ยงอุปการะหมี · สถานีเพาะเลี้ยงสัตว์ป่า บางละมุง</p>
           <p>
-            ในวาระวันเกิดของ <strong>XIONG</strong> วง <strong>NexT1DE</strong>
-            (29 มิถุนายน 2026) แฟนคลับขอชวนทุกคนร่วมเป็น "พ่อแม่อุปการะ" น้องหมี
-            ที่สวนสัตว์เปิดเขาเขียว อ.บางละมุง จ.ชลบุรี
+            เนื่องในวาระวันเกิดของ <strong>XIONG</strong> แห่งวง <strong>NexT1DE</strong>
+            (29 มิถุนายน 2026) บ้าน <strong>ShenXiong Thailand</strong>
+            ขอชวนทุกคนร่วมส่งต่อความรักในแบบน่ารัก ๆ
           </p>
           <p>
-            <strong>โบนัสกระตุ้นยอด 🐻</strong> — ทุก ๆ 296 บาทที่ทุกคนช่วยกันโดเนทเข้ามา
-            จะถูกแปลงเป็น <strong>อาหารน้องหมี 1 กรัม</strong> ที่ส่งมอบให้สวนสัตว์
+            เราขอเชิญชวนทุกคนมาร่วมเป็น <strong>"พ่อแม่อุปการะน้องหมี" 🐻</strong>
+            ณ สถานีเพาะเลี้ยงสัตว์ป่าบางละมุง จ.ชลบุรี
+            เพื่อมอบทั้งความอบอุ่นและอาหารอร่อย ๆ รวมถึงการดูแลรักษาพยาบาล
+            ให้กับน้องหมีทั้ง <strong>120 ชีวิต</strong>
+          </p>
+          <p>
+            🧸 <strong>โบนัสกระตุ้นยอด 🐻</strong> — ทุก ๆ 269 บาทที่ทุกคนร่วมกันโดเนท
+            จะถูกแปลงเป็น <strong>"อาหารน้องหมี 1 กิโล"</strong> (ประมาณการ)
+            เพื่อส่งมอบให้ทางสถานีอย่างแท้จริง
           </p>
           <p class="muted">
-            ยอดทั้งหมดจะนำส่งสวนสัตว์ในนาม "แฟนคลับ XIONG @ NexT1DE"
-            พร้อมประกาศหลักฐาน + จำนวนอาหารที่ส่งมอบหลังวันที่ 29 มิ.ย. 2026
+            มาร่วมกันเปลี่ยนความรักให้กลายเป็นการแบ่งปันที่น่ารักที่สุดไปด้วยกันนะคะ 💖
           </p>
         </div>
       </section>
@@ -167,11 +186,9 @@
     </main>
 
     <footer class="site-footer">
-      <div>Made with 🐻 + 💖 by <strong>ShenXiongThailand</strong></div>
+      <div>Made by <strong>ShenXiongThailand</strong></div>
       <div class="footer-links">
-        <a href="https://x.com/ShenXiongThailand" target="_blank" rel="noopener">𝕏 ShenXiongThailand</a>
-        <span class="footer-dot">·</span>
-        <a href="https://line.me/ti/g2/EDITME" target="_blank" rel="noopener">💬 OpenChat บน LINE</a>
+        <a href="https://x.com/ShenXiong_TH_fc" target="_blank" rel="noopener">𝕏 ShenXiong_TH_fc</a>
       </div>
     </footer>
   </div>

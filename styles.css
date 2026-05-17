@@ -186,8 +186,50 @@ a:hover { text-decoration: underline; }
   font-size: 16px;
   margin: 0 0 18px;
 }
+.hero-bearcount {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 6px 0 14px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--pink-50), var(--orange-50));
+  border: 1px solid var(--pink-100);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--ink);
+}
+.bearcount-num {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-weight: 700;
+  color: var(--pink-600);
+  flex-shrink: 0;
+}
+.bearcount-num strong {
+  font-size: 20px;
+  color: var(--pink-600);
+}
+.bearcount-loc {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+/* hashtag row */
 .hero .meta {
-  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+/* วันที่ + สถานที่ */
+.hero-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
@@ -982,6 +1024,86 @@ a:hover { text-decoration: underline; }
   .step3-preview .file-preview { max-height: 360px; }
 }
 
+/* ---------- Amount hero (simple — step 2) ---------- */
+.donate-total-hero.amount-hero {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 10px 0 4px;
+  margin: 4px 0 10px;
+}
+.donate-total-hero.amount-hero::before { display: none; } /* remove paw watermark */
+.amount-rate {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.amount-rate strong { color: var(--orange-600); font-weight: 700; }
+
+/* ---------- Scoop tabs (step 2 mode switch) ---------- */
+.scoop-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  background: var(--pink-50);
+  border: 1px solid var(--pink-100);
+  border-radius: 999px;
+  margin: 14px 0 12px;
+}
+.scoop-tab {
+  background: transparent;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.scoop-tab:hover { color: var(--pink-600); }
+.scoop-tab.active {
+  background: white;
+  color: var(--pink-600);
+  box-shadow: 0 4px 12px -4px rgba(255, 143, 182, .35);
+}
+
+/* ---------- Scoop panel (game / custom) ---------- */
+.scoop-panel { animation: fadeUp .25s ease; }
+.scoop-panel[hidden] { display: none; }
+
+/* ---------- Game area — bigger & cuter ---------- */
+.feeder-game {
+  flex-direction: column;
+  padding: 28px 20px 22px;
+  gap: 16px;
+  min-height: 210px;
+  background: linear-gradient(160deg, #FFF2F8 0%, #FFF6EC 50%, #FFEAF2 100%);
+  border: 1.5px solid var(--pink-200);
+}
+.feeder-stage {
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+.game-spoon { font-size: 44px; }
+.game-bear  { font-size: 90px; }
+.btn-scoop  {
+  font-size: 18px;
+  padding: 14px 52px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--pink-400), var(--orange-400));
+}
+.bowl-progress { margin: 2px 0 0; }
+.bowl-progress .progress { height: 14px; border-radius: 999px; }
+
 /* ---------- Mode tabs (scoop / custom) ---------- */
 .pay-mode-tabs {
   display: grid;
@@ -1026,11 +1148,17 @@ a:hover { text-decoration: underline; }
 
 /* ---------- Custom amount panel ---------- */
 .custom-amount {
-  background: linear-gradient(135deg, var(--pink-50), var(--orange-50));
-  border: 1px solid var(--orange-100);
+  background: linear-gradient(160deg, #FFF2F8 0%, #FFF6EC 50%, #FFEAF2 100%);
+  border: 1.5px solid var(--pink-200);
   border-radius: var(--radius-sm);
   padding: 18px 16px;
   text-align: center;
+  min-height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 .custom-amount label {
   display: block;
@@ -1150,12 +1278,13 @@ a:hover { text-decoration: underline; }
   animation: heart-pop 1.2s ease-out forwards;
 }
 .game-float.gain {
-  font-size: 12px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--orange-600);
   background: white;
-  padding: 2px 8px;
+  padding: 4px 14px;
   border-radius: 999px;
+  white-space: nowrap;
   box-shadow: 0 4px 10px -4px rgba(255, 143, 182, .4);
   border: 1px solid var(--orange-200);
   animation: gain-pop 1.2s ease-out forwards;
@@ -1213,6 +1342,175 @@ a:hover { text-decoration: underline; }
   color: var(--orange-600);
   font-size: 14px;
   font-family: var(--font-cute);
+}
+
+/* ---------- Donate total hero (BIG amount display) ---------- */
+.donate-total-hero {
+  position: relative;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 207, 166, .6), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(255, 200, 220, .55), transparent 60%),
+    linear-gradient(135deg, #FFFBF5 0%, #FFF4F8 100%);
+  border: 1.5px solid var(--orange-200);
+  border-radius: var(--radius);
+  padding: 18px 20px 16px;
+  text-align: center;
+  margin: 14px 0 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 28px -16px rgba(251, 131, 51, .35);
+}
+.donate-total-hero::before {
+  content: "🐾";
+  position: absolute;
+  font-size: 80px;
+  opacity: .06;
+  top: -16px;
+  right: -8px;
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+.dth-cap {
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  letter-spacing: .3px;
+  margin-bottom: 4px;
+}
+.dth-amount {
+  font-family: var(--font-cute);
+  font-size: clamp(44px, 9vw, 60px);
+  font-weight: 700;
+  line-height: 1.05;
+  background: linear-gradient(120deg, var(--orange-500) 0%, var(--pink-500) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -1px;
+  filter: drop-shadow(0 4px 8px rgba(251, 131, 51, .15));
+}
+.dth-currency {
+  font-size: .65em;
+  margin-right: 2px;
+  vertical-align: top;
+  line-height: 1;
+  display: inline-block;
+}
+.dth-meta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.dth-meta strong {
+  color: var(--orange-600);
+  font-weight: 700;
+  margin: 0 2px;
+}
+.dth-dot { opacity: .45; }
+
+/* Pulse animation — เด้งทุกครั้งที่ยอดเปลี่ยน */
+.donate-total-hero.pulse {
+  animation: dth-pulse .6s cubic-bezier(.4, -.2, .55, 1.5);
+}
+.donate-total-hero.pulse .dth-amount {
+  animation: dth-amount-pop .6s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes dth-pulse {
+  0%   { transform: scale(1); box-shadow: 0 10px 28px -16px rgba(251, 131, 51, .35); }
+  40%  { transform: scale(1.025); box-shadow: 0 18px 38px -12px rgba(251, 131, 51, .5); }
+  100% { transform: scale(1); box-shadow: 0 10px 28px -16px rgba(251, 131, 51, .35); }
+}
+@keyframes dth-amount-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.12); }
+  60%  { transform: scale(.97); }
+  100% { transform: scale(1); }
+}
+
+/* Confetti dots ที่โผล่บน hero ตอนครบ 1 kg */
+.donate-total-hero.kg-up::after {
+  content: "✨🎉✨";
+  position: absolute;
+  top: 8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  animation: dth-confetti 1.2s ease-out;
+  pointer-events: none;
+}
+@keyframes dth-confetti {
+  0%   { opacity: 0; transform: translate(-50%, 8px) scale(.6); }
+  30%  { opacity: 1; transform: translate(-50%, 0)   scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -28px) scale(1); }
+}
+
+/* Mobile — กระชับลงนิดหน่อย */
+@media (max-width: 480px) {
+  .donate-total-hero { padding: 14px 16px; margin: 10px 0 12px; }
+  .dth-amount { font-size: clamp(36px, 11vw, 48px); }
+  .dth-cap { font-size: 12px; }
+  .dth-meta { font-size: 12px; gap: 4px; }
+}
+
+/* ---------- Bowl progress (current bowl fill) ---------- */
+.bowl-progress { margin: 8px 0 14px; }
+.bowl-progress .progress {
+  height: 12px;
+  background: var(--orange-50);
+  border: 1px solid var(--orange-100);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bowl-progress .progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--orange-300), var(--orange-500));
+  border-radius: 999px;
+  transition: width .35s cubic-bezier(.4, .8, .4, 1);
+}
+
+/* ---------- Custom amount fallback toggle ---------- */
+.custom-fallback {
+  text-align: center;
+  margin: 4px 0 14px;
+}
+.custom-section {
+  margin-top: 10px;
+  animation: fadeUp .3s ease;
+}
+
+/* ---------- Suggested amount box (Step 3 — full width above grid) ---------- */
+.suggested-amount-box {
+  background: linear-gradient(135deg, #FFF6EC, #FFE4EE);
+  border: 1.5px solid var(--orange-200);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin: 0 0 16px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--ink);
+  animation: fadeUp .3s ease;
+}
+.suggested-amount-box strong {
+  display: inline-block;
+  margin: 0 6px;
+  color: var(--orange-600);
+  font-family: var(--font-cute);
+  font-size: 26px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+.suggested-amount-box .muted-sm {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-soft);
 }
 
 /* Editable amount field (compact) */
@@ -2405,6 +2703,8 @@ a:hover { text-decoration: underline; }
     padding: 26px 20px;
   }
   .hero .meta { justify-content: center; }
+  .hero-info-row { justify-content: center; }
+  .hero-bearcount { justify-content: center; }
   .hero h1 {
     font-size: clamp(22px, 6vw, 30px);
     line-height: 1.5;            /* เพิ่มระยะห่างระหว่างบรรทัด */

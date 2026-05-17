@@ -7,7 +7,7 @@
  *  - วันหมดเขตการโดเนท
  *  - ยอดเป้าหมาย
  *  - ข้อมูลศิลปิน / แคมเปญ / ช่องทางการโอน
- *  - โบนัสกระตุ้นยอด: ทุก 29 บาท = อาหารน้องหมี 1 กรัม
+ *  - โบนัสกระตุ้นยอด: ทุก 269 บาท = อาหารน้องหมี 1 กิโล (ประมาณการ)
  * ===========================================
  */
 
@@ -17,15 +17,18 @@ const APP_CONFIG = {
     name: "XIONG",
     group: "NexT1DE",
     birthday: "2026-06-29",
-    hashtag: "#HBDXIONG2026",
+    // เพิ่ม/ลบ hashtag ได้ — จะถูก render เป็น chip หลายอันบนหน้า hero
+    hashtags: ["#BearHugsForXIONG2026", "#ShenXiongTH"],
+    hashtag:  "#BearHugsForXIONG2026", // ★ legacy — ใช้สำหรับข้อความแชร์/social
   },
 
   campaign: {
     title: "CSR เลี้ยงอุปการะหมี",
     subtitle: "ฉลองวันเกิด XIONG วง NexT1DE",
-    location: "สวนสัตว์เปิดเขาเขียว อ.บางละมุง จ.ชลบุรี",
+    location: "สถานีเพาะเลี้ยงสัตว์ป่า บางละมุง",
+    bearCount: 120, // จำนวนน้องหมีที่ดูแลอยู่
     description:
-      "ร่วมโดเนทเลี้ยงอุปการะหมีในนามแฟนคลับ XIONG เพื่อมอบเป็นของขวัญวันเกิดให้น้องหมีได้รับการดูแลที่ดี — โบนัสพิเศษ: ทุก 29 บาทที่โดเนทเข้ามา จะถูกแปลงเป็นอาหารน้องหมี 1 กรัม",
+      "ร่วมโดเนทเลี้ยงอุปการะหมีในนามแฟนคลับ XIONG เพื่อมอบเป็นของขวัญวันเกิดให้น้องหมีได้รับการดูแลที่ดี — โบนัสพิเศษ: ทุก 269 บาทที่โดเนทเข้ามา จะถูกแปลงเป็นอาหารน้องหมี 1 กิโล (ประมาณการ)",
     coverEmoji: "🐻",
   },
 
@@ -37,7 +40,8 @@ const APP_CONFIG = {
     currency: "THB",
     currencySymbol: "฿",
     startedAt: "2026-05-01T00:00:00+07:00",
-    bahtPerFood: 29,                     // 29 บาท = อาหารน้องหมี 1 กรัม (โบนัสกระตุ้นยอด)
+    bahtPerFood: 269,                    // 269 บาท = อาหารน้องหมี 1 กิโล (ประมาณการ - โบนัสกระตุ้นยอด)
+    foodUnit: "กิโล",                    // หน่วยที่จะแสดงผล (กรัม/กิโล)
   },
 
   // ----- ช่องทางการโอน -----
@@ -63,7 +67,7 @@ const APP_CONFIG = {
     provider: "x",
     mode: "firebase",
     oauth2: {
-      clientId: "cS1iY0trZDB0S2pqVnVaclRtNGE6MTpjaQ",
+      clientId:     "cS1iY0trZDB0S2pqVnVaclRtNGE6MTpjaQ",
       clientSecret: "VHsWl936xPG5ug6-ZEBuAF7Yl9V9irjC0FWO9RcK-TcTglkbQv",
     },
   },
@@ -89,9 +93,9 @@ const APP_CONFIG = {
   //
   // เพิ่มลิงก์ใน endpoints object ได้ตามต้องการ
   api: {
-    env: "production",   // ★ ใช้ Functions emulator
+    env: "localhost",   // ★ ใช้ Functions emulator
     endpoints: {
-      localhost: "http://127.0.0.1:5001/xiongbirthday2026/us-central1",
+      localhost:  "http://127.0.0.1:5001/xiongbirthday2026/us-central1",
       production: "https://us-central1-xiongbirthday2026.cloudfunctions.net",
     },
   },
@@ -100,30 +104,29 @@ const APP_CONFIG = {
   // ใช้สำหรับ Firebase Storage (อัปโหลดสลิป) และ services อื่น ๆ ในอนาคต
   // API 4 เส้นด้านบนเรียกผ่าน HTTP โดยตรง ไม่ต้องใช้ SDK
   firebase: {
-    apiKey: "AIzaSyBXHqIQri4G0byXMULuMpYSsFVTHLM1-Sw",
-    authDomain: "xiongbirthday2026.firebaseapp.com",
-    databaseURL: "https://xiongbirthday2026-default-rtdb.firebaseio.com",
-    projectId: "xiongbirthday2026",
-    storageBucket: "xiongbirthday2026.firebasestorage.app",
+    apiKey:            "AIzaSyBXHqIQri4G0byXMULuMpYSsFVTHLM1-Sw",
+    authDomain:        "xiongbirthday2026.firebaseapp.com",
+    databaseURL:       "https://xiongbirthday2026-default-rtdb.firebaseio.com",
+    projectId:         "xiongbirthday2026",
+    storageBucket:     "xiongbirthday2026.firebasestorage.app",
     messagingSenderId: "955613591827",
-    appId: "1:955613591827:web:20eeedc40793f358eec2e6",
-    measurementId: "G-5CE9V6LMZH",
+    appId:             "1:955613591827:web:20eeedc40793f358eec2e6",
+    measurementId:     "G-5CE9V6LMZH",
   },
 
   // ----- Social / Share -----
   social: {
     twitter: "https://x.com/intent/tweet?text=",
     shareText:
-      "ร่วมโดเนทเลี้ยงอุปการะหมีเพื่อวันเกิด XIONG @ NexT1DE 🐻💖 #HBDXIONG2026",
+      "ร่วมโดเนทเลี้ยงอุปการะหมีเพื่อวันเกิด XIONG @ NexT1DE 🐻💖 #BearHugsForXIONG2026 #ShenXiongTH",
     siteUrl: "https://hbd-xiong-2026.example",
   },
 
   // ----- Organization / footer credit -----
   org: {
     name: "ShenXiongThailand",
-    xUrl: "https://x.com/ShenXiongThailand",
-    xHandle: "@ShenXiongThailand",
-    lineOpenChat: "https://line.me/ti/g2/EDITME",   // ใส่ลิงก์ OpenChat จริงตรงนี้
+    xUrl:    "https://x.com/ShenXiong_TH_fc",
+    xHandle: "@ShenXiong_TH_fc",
   },
 
   // ----- Wall of Love settings -----

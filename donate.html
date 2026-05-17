@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>แจ้งโดเนท · HBD XIONG 2026 🐻</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=2026-05-10z" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=2026-05-17f" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E🐻%3C/text%3E%3C/svg%3E" />
 </head>
+
 <body data-page="donate">
 
   <!-- Sticky top bar -->
@@ -19,7 +24,7 @@
         <div class="logo">🐻</div>
         <div>
           <div>HBD XIONG <span style="color: var(--pink-500)">2026</span></div>
-          <div class="brand-sub">แจ้งโดเนท · 3 ขั้นตอน</div>
+          <div class="brand-sub">แจ้งโดเนท · 4 ขั้นตอน</div>
         </div>
       </a>
       <nav class="nav">
@@ -34,8 +39,9 @@
     <div class="steps" id="wizard-steps">
       <div class="step-progress" id="wizard-progress"></div>
       <div class="step active"><span class="num">1</span><span class="step-label">ระบุตัวตน</span></div>
-      <div class="step"><span class="num">2</span><span class="step-label">ช่องทางโอน</span></div>
-      <div class="step"><span class="num">3</span><span class="step-label">แนบสลิป</span></div>
+      <div class="step"><span class="num">2</span><span class="step-label">ตักอาหาร</span></div>
+      <div class="step"><span class="num">3</span><span class="step-label">ช่องทางโอน</span></div>
+      <div class="step"><span class="num">4</span><span class="step-label">แนบสลิป</span></div>
     </div>
 
     <!-- ========== STEP 1: X Login ========== -->
@@ -63,13 +69,8 @@
               พิมพ์ @account ของคุณเพื่อยืนยันตัวตน
             </p>
             <form id="manual-handle-form" class="manual-input-row" autocomplete="off">
-              <input id="manual-handle"
-                     type="text"
-                     placeholder="@account"
-                     maxlength="20"
-                     inputmode="text"
-                     autocapitalize="off"
-                     spellcheck="false" />
+              <input id="manual-handle" type="text" placeholder="@account" maxlength="20" inputmode="text"
+                autocapitalize="off" spellcheck="false" />
               <button id="manual-handle-btn" type="submit" class="btn btn-ghost btn-sm">
                 ดำเนินการต่อ →
               </button>
@@ -79,7 +80,79 @@
       </div>
     </section>
 
-    <!-- ========== STEP 2: Payment ========== -->
+    <!-- ========== STEP 2: Choose donation amount ========== -->
+    <section class="panel" data-step-id="scoop">
+      <div class="card">
+
+        <!-- Profile bar -->
+        <div class="profile-bar">
+          <div class="x-profile big" id="x-profile-step-scoop">
+            <div class="avatar">X</div>
+            <div class="who">
+              <span class="name">—</span>
+              <span class="handle">—</span>
+            </div>
+            <button id="logout-step-scoop" type="button" class="logout-btn" title="กลับไปเข้าสู่ระบบใหม่">
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+
+        <!-- Amount display (clean, no heavy box) -->
+        <div class="donate-total-hero amount-hero" id="donate-total-hero">
+          <div class="dth-cap" id="dth-cap">ยอดโดเนท</div>
+          <div class="dth-amount">
+            <span class="dth-currency">฿</span><span id="total-amount-game">0</span>
+          </div>
+          <div class="amount-rate">🐻 1 กิโล = <strong>฿269</strong></div>
+        </div>
+
+        <!-- Mode tabs -->
+        <div class="scoop-tabs">
+          <button id="tab-game" type="button" class="scoop-tab active">🍯 ตักอาหาร</button>
+          <button id="tab-custom" type="button" class="scoop-tab">✏️ กรอกเอง</button>
+        </div>
+
+        <!-- Game panel -->
+        <div id="game-panel" class="scoop-panel">
+          <div class="feeder-game">
+            <div class="feeder-stage">
+              <span class="game-spoon" id="game-spoon">🥄</span>
+              <span class="game-bear" id="game-bear">🐻</span>
+              <div class="game-floats" id="game-floats"></div>
+            </div>
+            <button id="btn-scoop" type="button" class="btn-scoop" aria-label="ตักอาหารให้น้องหมี">
+              <span class="scoop-icon">🐾</span> ตัก!
+            </button>
+          </div>
+          <div class="bowl-progress">
+            <div class="progress"><span id="bowl-bar"></span></div>
+          </div>
+          <!-- Hidden tracking elements for JS -->
+          <span id="bowl-grams" style="display:none">0</span>
+          <span id="total-scoop-text" style="display:none">0 g</span>
+        </div>
+
+        <!-- Custom amount panel -->
+        <div id="custom-section" class="scoop-panel" hidden>
+          <div class="custom-amount">
+            <label for="custom-amount-input">จำนวนเงินที่จะโอน (บาท)</label>
+            <div class="amount-input-wrap">
+              <span class="baht-cap">฿</span>
+              <input id="custom-amount-input" type="number" min="1" step="1" placeholder="269" inputmode="numeric" />
+              <span class="baht-cap">บาท</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btn-reset-scoop" type="button" class="btn btn-ghost">เริ่มใหม่</button>
+          <button id="step-scoop-continue" type="button" class="btn btn-primary">ดำเนินการต่อ →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STEP 3: Payment ========== -->
     <section class="panel">
       <div class="card">
         <h2 style="text-align:center">ช่องทางการโอน</h2>
@@ -98,6 +171,13 @@
           </div>
         </div>
 
+        <!-- Suggested amount (แสดงเมื่อมียอดจาก step 2) -->
+        <div class="suggested-amount-box" id="suggested-amount-box" hidden>
+          ยอดโดเนทของคุณ
+          <strong id="suggested-amount-val">—</strong>
+          <div class="muted-sm">โอนยอดอื่นก็ได้ ระบบอ่านยอดจากสลิปอัตโนมัติ</div>
+        </div>
+
         <!-- Two-column grid (QR left, bank info right) -->
         <div class="step2-grid">
 
@@ -105,9 +185,6 @@
           <div class="step2-left">
             <div class="qr-clean">
               <img id="qr-img" src="assets/qr_promptpay.png" alt="QR PromptPay" />
-            </div>
-            <div class="qr-tip">
-              💡 ทุก <strong>29 บาท</strong> = อาหารน้องหมี <strong>1 กรัม</strong>
             </div>
           </div>
 
@@ -136,19 +213,20 @@
             </div>
 
             <p class="muted" style="font-size:13px;text-align:center;margin:6px 0 0">
-              💡 หลังโอนเสร็จแล้ว กดถัดไปเพื่อแนบสลิป
+              💡 <strong>269 บาท</strong> = อาหารน้องหมี 1 กิโล
             </p>
           </div>
 
         </div>
 
         <div class="actions">
-          <button id="step2-continue" type="button" class="btn btn-primary">ฉันโอนเรียบร้อยแล้ว →</button>
+          <button id="step3-payment-back" type="button" class="btn btn-ghost">← ย้อนกลับ</button>
+          <button id="step2-continue" type="button" class="btn btn-primary">โอนเรียบร้อยแล้ว →</button>
         </div>
       </div>
     </section>
 
-    <!-- ========== STEP 3: Slip upload + OCR ========== -->
+    <!-- ========== STEP 4: Slip upload + OCR ========== -->
     <section class="panel">
       <div class="card">
         <h2>แนบสลิปการโอน</h2>
@@ -212,11 +290,9 @@
     </section>
 
     <footer class="site-footer">
-      <div>Made with 🐻 + 💖 by <strong>ShenXiongThailand</strong></div>
+      <div>Made by <strong>ShenXiongThailand</strong></div>
       <div class="footer-links">
-        <a href="https://x.com/ShenXiongThailand" target="_blank" rel="noopener">𝕏 ShenXiongThailand</a>
-        <span class="footer-dot">·</span>
-        <a href="https://line.me/ti/g2/EDITME" target="_blank" rel="noopener">💬 OpenChat บน LINE</a>
+        <a href="https://x.com/ShenXiong_TH_fc" target="_blank" rel="noopener">𝕏 ShenXiong_TH_fc</a>
       </div>
     </footer>
   </div>
@@ -227,7 +303,8 @@
   <script src="config.js?v=2026-05-10z"></script>
   <!-- โหลด X auth config (ไฟล์นี้ถูก gitignore) — จะ 404 เงียบ ๆ ถ้ายังไม่มี -->
   <script src="config.x.staging.js?v=2026-05-10z" onerror="this.remove()"></script>
-  <script src="api.js?v=2026-05-10z"></script>
-  <script src="app.js?v=2026-05-10z"></script>
+  <script src="api.js?v=2026-05-17g"></script>
+  <script src="app.js?v=2026-05-17g"></script>
 </body>
+
 </html>

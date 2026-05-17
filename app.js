@@ -1,6 +1,6 @@
 /* =========================================================
    CSR เลี้ยงอุปการะหมี — XIONG Birthday 2026
-   (โบนัสกระตุ้นยอด: ทุก 296 บาท = นมเด็ก 1 กล่อง)
+   (โบนัสกระตุ้นยอด: ทุก 269 บาท = อาหารน้องหมี 1 กิโล)
    - localStorage เก็บผู้ใช้ X + ประวัติการโดเนทต่อ handle
    ========================================================= */
 
@@ -116,7 +116,7 @@ function isCommunityLoaded() {
 
 /* ---------- Bear-food helper (bonus motivator) ---------- */
 function calcBearFood(amount) {
-  const per = APP_CONFIG.donation.bahtPerFood || APP_CONFIG.donation.bahtPerMilk || 296;
+  const per = APP_CONFIG.donation.bahtPerFood || APP_CONFIG.donation.bahtPerMilk || 269;
   return Math.floor(amount / per);
 }
 
@@ -142,18 +142,18 @@ function clearCurrentUser() {
   try {
     const fb = ensureFirebase();
     if (fb && fb.auth) fb.auth().signOut();
-  } catch {}
+  } catch { }
 }
 
 const SAMPLE_USERS = [
-  { handle: "honey_x",      name: "Honey",     emoji: "🍯" },
-  { handle: "n1de_fan",     name: "Berry",     emoji: "🫐" },
-  { handle: "blueberry_xx", name: "BCubcake",  emoji: "🐻" },
-  { handle: "cubcube",      name: "Lulu",      emoji: "🐰" },
-  { handle: "xiongbear",    name: "Sora",      emoji: "🐾" },
-  { handle: "petitbear",    name: "Mochi",     emoji: "🌸" },
-  { handle: "miniN1DE",     name: "Mintie",    emoji: "🌼" },
-  { handle: "softpaw_x",    name: "Peach",     emoji: "🍑" },
+  { handle: "honey_x", name: "Honey", emoji: "🍯" },
+  { handle: "n1de_fan", name: "Berry", emoji: "🫐" },
+  { handle: "blueberry_xx", name: "BCubcake", emoji: "🐻" },
+  { handle: "cubcube", name: "Lulu", emoji: "🐰" },
+  { handle: "xiongbear", name: "Sora", emoji: "🐾" },
+  { handle: "petitbear", name: "Mochi", emoji: "🌸" },
+  { handle: "miniN1DE", name: "Mintie", emoji: "🌼" },
+  { handle: "softpaw_x", name: "Peach", emoji: "🍑" },
 ];
 
 function mockXLogin() {
@@ -224,9 +224,9 @@ async function loginWithFirebaseTwitter() {
     console.error("Twitter sign-in (popup) failed:", err);
     const popupBroken =
       err && (err.code === "auth/popup-blocked" ||
-              err.code === "auth/popup-closed-by-user" ||
-              err.code === "auth/web-storage-unsupported" ||
-              err.code === "auth/operation-not-supported-in-this-environment");
+        err.code === "auth/popup-closed-by-user" ||
+        err.code === "auth/web-storage-unsupported" ||
+        err.code === "auth/operation-not-supported-in-this-environment");
     if (popupBroken) {
       // ใช้ redirect แทน — หน้าจะหายไป login ที่ X แล้วกลับมาที่ donate.html
       try {
@@ -310,9 +310,9 @@ function startCountdown(targetEl) {
 
     targetEl.innerHTML = `
       <div class="cd-cell"><div class="num">${d}</div><span class="lab">วัน</span></div>
-      <div class="cd-cell"><div class="num">${String(h).padStart(2,"0")}</div><span class="lab">ชั่วโมง</span></div>
-      <div class="cd-cell"><div class="num">${String(m).padStart(2,"0")}</div><span class="lab">นาที</span></div>
-      <div class="cd-cell"><div class="num">${String(s).padStart(2,"0")}</div><span class="lab">วินาที</span></div>
+      <div class="cd-cell"><div class="num">${String(h).padStart(2, "0")}</div><span class="lab">ชั่วโมง</span></div>
+      <div class="cd-cell"><div class="num">${String(m).padStart(2, "0")}</div><span class="lab">นาที</span></div>
+      <div class="cd-cell"><div class="num">${String(s).padStart(2, "0")}</div><span class="lab">วินาที</span></div>
     `;
   }
 
@@ -449,11 +449,29 @@ function escapeHtml(s) {
 
 /* ---------- Render: Home page ---------- */
 function renderHome() {
-  const hashtagChip = document.getElementById("hashtag-chip");
-  if (hashtagChip) hashtagChip.textContent = APP_CONFIG.artist.hashtag;
+  // hashtags — รองรับทั้ง array (hashtags) และ string เดี่ยว (hashtag) แบบ legacy
+  const metaEl = document.getElementById("hashtag-meta");
+  if (metaEl) {
+    const tags = Array.isArray(APP_CONFIG.artist.hashtags)
+      ? APP_CONFIG.artist.hashtags
+      : APP_CONFIG.artist.hashtag ? [APP_CONFIG.artist.hashtag] : [];
+    // ล้าง chip hashtag เก่า (ถ้ามี) ก่อนเติมใหม่ที่หัว
+    metaEl.querySelectorAll(".chip.hashtag").forEach((el) => el.remove());
+    tags.slice().reverse().forEach((tag) => {
+      const chip = document.createElement("span");
+      chip.className = "chip hashtag";
+      chip.textContent = tag;
+      metaEl.insertBefore(chip, metaEl.firstChild);
+    });
+  }
 
   const locChip = document.getElementById("location-chip");
   if (locChip) locChip.textContent = "📍 " + APP_CONFIG.campaign.location;
+
+  const bearEl = document.getElementById("bear-count");
+  if (bearEl && APP_CONFIG.campaign.bearCount) {
+    bearEl.textContent = fmt(APP_CONFIG.campaign.bearCount);
+  }
 
   function paintTotals() {
     const loaded = isCommunityLoaded();
@@ -571,7 +589,7 @@ function renderSlipResult(result) {
     box.innerHTML = `
       <h4>⚠️ แนบไฟล์ไม่ถูกต้อง</h4>
       <p>${escapeHtml((result && result.reason) || "ไม่สามารถอ่านสลิปได้"
-        )}</p>
+    )}</p>
       <button id="slip-manual-btn" type="button" class="slip-manual-btn">
         ✏️ ยืนยันว่าถูกต้อง · กรอกยอดเอง
       </button>
@@ -639,16 +657,35 @@ function setupDonatePage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // (Step 2 ไม่มีช่องกรอกยอดและ scoop game แล้ว — ผู้ใช้โอนตามใจ
-  //  แล้วระบบ OCR ที่ Step 3 จะเป็นตัวยืนยันยอด)
+  // รีเซ็ต state ของ scoop game (เรียกตอน logout)
   function resetStep2State() {
-    /* placeholder for forward-compat */
+    bowlGrams = 0;
+    totalKg = 0;
+    customAmount = 0;
+    useCustom = false;
+    const ci = document.getElementById("custom-amount-input");
+    if (ci) ci.value = "";
+    // reset tabs → game mode
+    const cs = document.getElementById("custom-section");
+    if (cs) cs.hidden = true;
+    const gp = document.getElementById("game-panel");
+    if (gp) gp.hidden = false;
+    const tabGame = document.getElementById("tab-game");
+    if (tabGame) tabGame.classList.add("active");
+    const tabCustom = document.getElementById("tab-custom");
+    if (tabCustom) tabCustom.classList.remove("active");
+    // ซ่อน suggested-amount-box ในหน้า payment
+    const sb = document.getElementById("suggested-amount-box");
+    if (sb) sb.hidden = true;
+    // repaint (ถ้า DOM ของ scoop step มีอยู่)
+    if (typeof paintScoop === "function") paintScoop();
   }
 
   // ---- Step 1: X login ----
   const loginBtn = document.getElementById("x-login-btn");
 
   function paintAllProfiles(user) {
+    paintProfileEl(document.getElementById("x-profile-step-scoop"), user);
     paintProfileEl(document.getElementById("x-profile-step2"), user);
     paintProfileEl(document.getElementById("x-profile-step3"), user);
   }
@@ -867,6 +904,11 @@ function setupDonatePage() {
     resetStep2State();
   }
 
+  document.getElementById("logout-step-scoop")?.addEventListener("click", () => {
+    logoutAndReset();
+    showToast("ออกจากระบบแล้ว");
+    gotoStep(0);
+  });
   document.getElementById("logout-step2")?.addEventListener("click", () => {
     logoutAndReset();
     showToast("ออกจากระบบแล้ว");
@@ -878,11 +920,197 @@ function setupDonatePage() {
     gotoStep(0);
   });
 
+  // ===== Step 2: Scoop game (feed the bear) =====
+  // State (อยู่ใน closure ของ setupDonatePage ดังนั้น reset เมื่อ reload หน้าเท่านั้น)
+  const PER_KG = APP_CONFIG.donation.bahtPerFood || 269;
+  const KG = 1000;
+  let bowlGrams = 0;
+  let totalKg = 0;
+  let customAmount = 0;
+  let useCustom = false;
+
+  const elBtnScoop = document.getElementById("btn-scoop");
+  const elBtnReset = document.getElementById("btn-reset-scoop");
+  const elBowlGrams = document.getElementById("bowl-grams");
+  const elBowlBar = document.getElementById("bowl-bar");
+  const elTotalScoopText = document.getElementById("total-scoop-text");
+  const elTotalAmt = document.getElementById("total-amount-game");
+  const elSpoon = document.getElementById("game-spoon");
+  const elBear = document.getElementById("game-bear");
+  const elFloats = document.getElementById("game-floats");
+  const elTabGame = document.getElementById("tab-game");
+  const elTabCustom = document.getElementById("tab-custom");
+  const elGamePanel = document.getElementById("game-panel");
+  const elCustomSection = document.getElementById("custom-section");
+  const elCustomInput = document.getElementById("custom-amount-input");
+  const elScoopContinue = document.getElementById("step-scoop-continue");
+
+  // รวมกรัมที่ตักทั้งหมด (รวม bowl ปัจจุบัน + kg เต็มที่ผ่านมา)
+  function getTotalGrams() {
+    return totalKg * KG + bowlGrams;
+  }
+
+  // คำนวณยอดบริจาคตามสัดส่วนของกรัมจริง
+  // เช่น 269 บาท/กิโล → กรัมละ 0.269 บาท → 500g = 135 บาท
+  function currentAmount() {
+    if (useCustom) {
+      const typed = Math.max(0, Math.floor(customAmount || 0));
+      return typed > 0 ? typed : PER_KG; // default = 1 กิโล (269) เมื่อยังไม่ได้พิมพ์
+    }
+    return Math.round(getTotalGrams() * PER_KG / KG);
+  }
+
+  // แสดงจำนวนรวมแบบสมาร์ท: < 1 kg → "X g", ≥ 1 kg → "X.X กิโล"
+  function formatTotalScoop(grams) {
+    if (grams < KG) return fmt(grams) + " g";
+    const kg = grams / KG;
+    // ตัดทศนิยมเหลือ 1 ตำแหน่งแต่ไม่โชว์ ".0"
+    const rounded = Math.round(kg * 10) / 10;
+    return (rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)) + " กิโล";
+  }
+
+  // เก็บค่าก่อนหน้าไว้เทียบ → ใช้กับ pulse animation
+  let prevAmount = 0;
+  let prevKg = 0;
+
+  function paintScoop(opts = {}) {
+    const amt = currentAmount();
+    const totalG = getTotalGrams();
+
+    if (elBowlGrams) elBowlGrams.textContent = fmt(bowlGrams);
+    if (elBowlBar) elBowlBar.style.width = Math.min(100, (bowlGrams / KG) * 100).toFixed(1) + "%";
+    if (elTotalScoopText) elTotalScoopText.textContent = formatTotalScoop(totalG);
+    if (elTotalAmt) elTotalAmt.textContent = fmt(amt);
+
+    // อัปเดต caption ตามสถานะ
+    const cap = document.getElementById("dth-cap");
+    if (cap) {
+      cap.textContent = amt > 0
+        ? (useCustom ? "💰 ยอดโดเนทของคุณ" : "💖 ยอดโดเนทสะสมจากการตัก")
+        : "🐻 ยอดที่กรอกโดเนทเอง";
+    }
+
+    // Pulse animation เมื่อยอดเปลี่ยน
+    const hero = document.getElementById("donate-total-hero");
+    if (hero && amt !== prevAmount) {
+      hero.classList.remove("pulse", "kg-up");
+      void hero.offsetWidth; // restart animation
+      hero.classList.add("pulse");
+      if (totalKg > prevKg) hero.classList.add("kg-up");
+      setTimeout(() => hero.classList.remove("pulse", "kg-up"), 1300);
+    }
+    prevAmount = amt;
+    prevKg = totalKg;
+
+    if (elScoopContinue) {
+      elScoopContinue.textContent = amt > 0
+        ? `ดำเนินการต่อ → (${fmtBaht(amt)})`
+        : "ดำเนินการต่อ →";
+    }
+  }
+
+  function spawnFloat(content, cls) {
+    if (!elFloats) return;
+    const el = document.createElement("div");
+    el.className = "game-float " + (cls || "");
+    el.textContent = content;
+    // เพิ่ม horizontal jitter เล็กน้อยเพื่อความน่ารัก
+    el.style.left = (45 + Math.random() * 10) + "%";
+    elFloats.appendChild(el);
+    setTimeout(() => el.remove(), 1400);
+  }
+
+  elBtnScoop?.addEventListener("click", () => {
+    // สุ่ม 30-150 กรัม
+    const gained = 30 + Math.floor(Math.random() * 121);
+    bowlGrams += gained;
+
+    // restart animations
+    elSpoon?.classList.remove("scoop");
+    void elSpoon?.offsetWidth;
+    elSpoon?.classList.add("scoop");
+    elBear?.classList.remove("chew");
+    void elBear?.offsetWidth;
+    elBear?.classList.add("chew");
+
+    spawnFloat("+" + gained + " g", "gain");
+
+    // เกิน 1 kg → conversion
+    while (bowlGrams >= KG) {
+      bowlGrams -= KG;
+      totalKg += 1;
+      // ฉลองเมื่อครบ 1 กิโล
+      setTimeout(() => spawnFloat("💖", "heart"), 100);
+      setTimeout(() => spawnFloat("🍯", ""), 200);
+      showToast(`🎉 ตักครบ ${totalKg} กิโลแล้ว!`);
+    }
+    paintScoop();
+  });
+
+  elBtnReset?.addEventListener("click", () => {
+    bowlGrams = 0;
+    totalKg = 0;
+    if (elCustomInput) elCustomInput.value = "";
+    customAmount = 0;
+    paintScoop();
+    showToast("รีเซ็ตแล้ว เริ่มตักใหม่ได้เลย!");
+  });
+
+  function switchToGame() {
+    useCustom = false;
+    if (elGamePanel) elGamePanel.hidden = false;
+    if (elCustomSection) elCustomSection.hidden = true;
+    elTabGame?.classList.add("active");
+    elTabCustom?.classList.remove("active");
+    paintScoop();
+  }
+  function switchToCustom() {
+    useCustom = true;
+    if (elGamePanel) elGamePanel.hidden = true;
+    if (elCustomSection) elCustomSection.hidden = false;
+    elTabGame?.classList.remove("active");
+    elTabCustom?.classList.add("active");
+    paintScoop();
+    setTimeout(() => elCustomInput?.focus(), 100);
+  }
+  elTabGame?.addEventListener("click", switchToGame);
+  elTabCustom?.addEventListener("click", switchToCustom);
+
+  elCustomInput?.addEventListener("input", () => {
+    customAmount = Number(elCustomInput.value || 0);
+    paintScoop();
+  });
+
+  elScoopContinue?.addEventListener("click", () => {
+    const user = getCurrentUser();
+    if (!user) return gotoStep(0);
+
+    const amt = currentAmount();
+    window.__suggestedAmount = amt;
+
+    // อัปเดต suggested amount บนหน้า QR
+    const box = document.getElementById("suggested-amount-box");
+    const valEl = document.getElementById("suggested-amount-val");
+    if (amt > 0) {
+      if (valEl) valEl.textContent = fmtBaht(amt);
+      if (box) box.hidden = false;
+    } else {
+      if (box) box.hidden = true;
+    }
+
+    gotoStep(2); // ไปหน้า QR/ช่องทางโอน
+  });
+
+  // initial paint
+  paintScoop();
+
+  document.getElementById("step3-payment-back")?.addEventListener("click", () => gotoStep(1));
+
   document.getElementById("step2-continue")?.addEventListener("click", () => {
     const user = getCurrentUser();
     if (!user) return gotoStep(0);
     paintAllProfiles(user);
-    gotoStep(2);
+    gotoStep(3); // ★ เพิ่มจาก 2 → 3 เพราะมี scoop step คั่นแล้ว
     const dn = document.getElementById("display-name");
     if (dn && !dn.value) dn.value = user.name || user.handle || "";
   });
@@ -951,9 +1179,9 @@ function setupDonatePage() {
     //   ใช้ผลตอน user กด "ยืนยันการโดเนท"
     driveUploadPromise = (window.Api && window.Api.uploadSlipImage)
       ? window.Api.uploadSlipImage(file).catch((err) => {
-          console.warn("Drive upload failed (best-effort):", err);
-          return null;
-        })
+        console.warn("Drive upload failed (best-effort):", err);
+        return null;
+      })
       : Promise.resolve(null);
 
     // ขณะเดียวกัน ยิง checkSlip + แสดง loading
@@ -983,7 +1211,7 @@ function setupDonatePage() {
     }
   });
 
-  document.getElementById("step3-back")?.addEventListener("click", () => gotoStep(1));
+  document.getElementById("step3-back")?.addEventListener("click", () => gotoStep(2)); // ★ ย้อนกลับไป payment (idx 2 ใหม่ เพราะมี scoop step คั่น)
 
   // Event delegation: เมื่อกดปุ่ม "ยืนยันว่าถูกต้อง / กรอกยอดเอง" → เข้าโหมด manual
   slipResultBox?.addEventListener("click", (e) => {
@@ -1194,7 +1422,7 @@ function renderThankYou() {
         <div class="ty-mini-divider"></div>
         <div class="ty-mini-stat">
           <span class="ty-mini-cap">อาหารน้องหมีสะสม</span>
-          <strong class="ty-mini-val">${fmt(cumulativeFood)} <span class="ty-mini-unit">กรัม</span></strong>
+          <strong class="ty-mini-val">${fmt(cumulativeFood)} <span class="ty-mini-unit">${APP_CONFIG.donation.foodUnit || "กิโล"}</span></strong>
         </div>
       </div>
     </div>
