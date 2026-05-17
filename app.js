@@ -1294,6 +1294,7 @@ function setupDonatePage() {
       handle: user.handle,
       name: user.name,
       displayName,
+      avatarUrl: user.avatarUrl || "",
       avatarEmoji: user.avatarEmoji,
       amount: lastSlipResult.amount,
       receiptName: file?.name || "slip",
