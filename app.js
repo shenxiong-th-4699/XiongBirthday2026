@@ -659,8 +659,7 @@ function setupDonatePage() {
 
   // รีเซ็ต state ของ scoop game (เรียกตอน logout)
   function resetStep2State() {
-    bowlGrams = 0;
-    totalKg = 0;
+    scoopCount = 0;
     customAmount = 0;
     useCustom = false;
     const ci = document.getElementById("custom-amount-input");
@@ -677,7 +676,8 @@ function setupDonatePage() {
     // ซ่อน suggested-amount-box ในหน้า payment
     const sb = document.getElementById("suggested-amount-box");
     if (sb) sb.hidden = true;
-    // repaint (ถ้า DOM ของ scoop step มีอยู่)
+    // repaint
+    if (typeof resetBearBowl === "function") resetBearBowl();
     if (typeof paintScoop === "function") paintScoop();
   }
 
@@ -922,18 +922,17 @@ function setupDonatePage() {
 
   // ===== Step 2: Scoop game (feed the bear) =====
   // State (อยู่ใน closure ของ setupDonatePage ดังนั้น reset เมื่อ reload หน้าเท่านั้น)
-  const PER_KG = APP_CONFIG.donation.bahtPerFood || 269;
-  const KG = 1000;
-  let bowlGrams = 0;
-  let totalKg = 0;
+  const PER_SCOOP = 46; // 1 ตัก = ฿46 เสมอ
+  let scoopCount = 0;
   let customAmount = 0;
   let useCustom = false;
 
+  // อาหารที่แสดงในถ้วย (หมุนเวียนตามลำดับ)
+  const BOWL_FOODS = ["🍯", "🍎", "🫐", "🍓", "🍖", "🐟", "🥕", "🌽", "🍗", "🥜"];
+  const BOWL_MAX_DISPLAY = 20; // สูงสุดที่แสดงในถ้วย
+
   const elBtnScoop = document.getElementById("btn-scoop");
   const elBtnReset = document.getElementById("btn-reset-scoop");
-  const elBowlGrams = document.getElementById("bowl-grams");
-  const elBowlBar = document.getElementById("bowl-bar");
-  const elTotalScoopText = document.getElementById("total-scoop-text");
   const elTotalAmt = document.getElementById("total-amount-game");
   const elSpoon = document.getElementById("game-spoon");
   const elBear = document.getElementById("game-bear");
@@ -944,42 +943,71 @@ function setupDonatePage() {
   const elCustomSection = document.getElementById("custom-section");
   const elCustomInput = document.getElementById("custom-amount-input");
   const elScoopContinue = document.getElementById("step-scoop-continue");
+  const elBearBowlFood = document.getElementById("bear-bowl-food");
+  const elBearBowlLabel = document.getElementById("bear-bowl-label");
 
-  // รวมกรัมที่ตักทั้งหมด (รวม bowl ปัจจุบัน + kg เต็มที่ผ่านมา)
-  function getTotalGrams() {
-    return totalKg * KG + bowlGrams;
-  }
-
-  // คำนวณยอดบริจาคตามสัดส่วนของกรัมจริง
-  // เช่น 269 บาท/กิโล → กรัมละ 0.269 บาท → 500g = 135 บาท
+  // คำนวณยอดโดเนท: 1 ตัก = ฿46 เสมอ
   function currentAmount() {
     if (useCustom) {
       const typed = Math.max(0, Math.floor(customAmount || 0));
-      return typed > 0 ? typed : PER_KG; // default = 1 กิโล (269) เมื่อยังไม่ได้พิมพ์
+      return typed > 0 ? typed : PER_SCOOP;
     }
-    return Math.round(getTotalGrams() * PER_KG / KG);
+    return scoopCount * PER_SCOOP;
   }
 
-  // แสดงจำนวนรวมแบบสมาร์ท: < 1 kg → "X g", ≥ 1 kg → "X.X กิโล"
-  function formatTotalScoop(grams) {
-    if (grams < KG) return fmt(grams) + " g";
-    const kg = grams / KG;
-    // ตัดทศนิยมเหลือ 1 ตำแหน่งแต่ไม่โชว์ ".0"
-    const rounded = Math.round(kg * 10) / 10;
-    return (rounded % 1 === 0 ? rounded.toFixed(0) : rounded.toFixed(1)) + " กิโล";
+  // เพิ่มอาหาร 1 ชิ้นเข้าถ้วย (เรียกทุกครั้งที่กดตัก — append เท่านั้น ไม่ rebuild)
+  function addFoodToBowl() {
+    if (!elBearBowlFood) return;
+
+    if (scoopCount <= BOWL_MAX_DISPLAY) {
+      // ลบ overflow badge เก่าก่อน (ถ้ามี) แล้ว append food item ใหม่
+      const overflow = elBearBowlFood.querySelector(".bear-bowl-overflow");
+      if (overflow) overflow.remove();
+
+      const span = document.createElement("span");
+      span.className = "bear-bowl-food-item";
+      span.textContent = BOWL_FOODS[(scoopCount - 1) % BOWL_FOODS.length];
+      elBearBowlFood.appendChild(span);
+
+      // ถ้าเกิน MAX ให้ใส่ badge กลับ
+      if (scoopCount === BOWL_MAX_DISPLAY) {
+        // เต็มพอดี ไม่ต้องมี badge
+      }
+    } else {
+      // เกิน max → อัปเดต overflow badge
+      let badge = elBearBowlFood.querySelector(".bear-bowl-overflow");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "bear-bowl-overflow";
+        elBearBowlFood.appendChild(badge);
+      }
+      badge.textContent = `+${scoopCount - BOWL_MAX_DISPLAY}`;
+    }
+
+    // label
+    if (elBearBowlLabel) {
+      if (scoopCount <= 3) {
+        elBearBowlLabel.textContent = `🥣 มีอาหารแล้ว ${scoopCount} ตัก 💕`;
+      } else if (scoopCount <= 10) {
+        elBearBowlLabel.textContent = `🥣 อาหารกำลังเยอะขึ้น ${scoopCount} ตัก 🎉`;
+      } else {
+        elBearBowlLabel.textContent = `🥣 โอ้โห ${scoopCount} ตัก! หมีแฮปปี้มาก 💖`;
+      }
+    }
+  }
+
+  // ล้างถ้วย (เรียกตอน reset)
+  function resetBearBowl() {
+    if (elBearBowlFood) elBearBowlFood.innerHTML = "";
+    if (elBearBowlLabel) elBearBowlLabel.textContent = "";
   }
 
   // เก็บค่าก่อนหน้าไว้เทียบ → ใช้กับ pulse animation
   let prevAmount = 0;
-  let prevKg = 0;
 
   function paintScoop(opts = {}) {
     const amt = currentAmount();
-    const totalG = getTotalGrams();
 
-    if (elBowlGrams) elBowlGrams.textContent = fmt(bowlGrams);
-    if (elBowlBar) elBowlBar.style.width = Math.min(100, (bowlGrams / KG) * 100).toFixed(1) + "%";
-    if (elTotalScoopText) elTotalScoopText.textContent = formatTotalScoop(totalG);
     if (elTotalAmt) elTotalAmt.textContent = fmt(amt);
 
     // อัปเดต caption ตามสถานะ
@@ -987,20 +1015,18 @@ function setupDonatePage() {
     if (cap) {
       cap.textContent = amt > 0
         ? (useCustom ? "💰 ยอดโดเนทของคุณ" : "💖 ยอดโดเนทสะสมจากการตัก")
-        : "🐻 ยอดที่กรอกโดเนทเอง";
+        : "🐻 รอตักอาหารให้หมี";
     }
 
     // Pulse animation เมื่อยอดเปลี่ยน
     const hero = document.getElementById("donate-total-hero");
     if (hero && amt !== prevAmount) {
-      hero.classList.remove("pulse", "kg-up");
+      hero.classList.remove("pulse");
       void hero.offsetWidth; // restart animation
       hero.classList.add("pulse");
-      if (totalKg > prevKg) hero.classList.add("kg-up");
-      setTimeout(() => hero.classList.remove("pulse", "kg-up"), 1300);
+      setTimeout(() => hero.classList.remove("pulse"), 1300);
     }
     prevAmount = amt;
-    prevKg = totalKg;
 
     if (elScoopContinue) {
       elScoopContinue.textContent = amt > 0
@@ -1021,9 +1047,7 @@ function setupDonatePage() {
   }
 
   elBtnScoop?.addEventListener("click", () => {
-    // สุ่ม 30-150 กรัม
-    const gained = 30 + Math.floor(Math.random() * 121);
-    bowlGrams += gained;
+    scoopCount += 1;
 
     // restart animations
     elSpoon?.classList.remove("scoop");
@@ -1033,25 +1057,18 @@ function setupDonatePage() {
     void elBear?.offsetWidth;
     elBear?.classList.add("chew");
 
-    spawnFloat("+" + gained + " g", "gain");
+    // float แสดง +฿46 (fixed เสมอ)
+    spawnFloat("+฿46", "gain");
 
-    // เกิน 1 kg → conversion
-    while (bowlGrams >= KG) {
-      bowlGrams -= KG;
-      totalKg += 1;
-      // ฉลองเมื่อครบ 1 กิโล
-      setTimeout(() => spawnFloat("💖", "heart"), 100);
-      setTimeout(() => spawnFloat("🍯", ""), 200);
-      showToast(`🎉 ตักครบ ${totalKg} กิโลแล้ว!`);
-    }
+    addFoodToBowl();
     paintScoop();
   });
 
   elBtnReset?.addEventListener("click", () => {
-    bowlGrams = 0;
-    totalKg = 0;
+    scoopCount = 0;
     if (elCustomInput) elCustomInput.value = "";
     customAmount = 0;
+    resetBearBowl();
     paintScoop();
     showToast("รีเซ็ตแล้ว เริ่มตักใหม่ได้เลย!");
   });
@@ -1102,6 +1119,7 @@ function setupDonatePage() {
   });
 
   // initial paint
+  resetBearBowl();
   paintScoop();
 
   document.getElementById("step3-payment-back")?.addEventListener("click", () => gotoStep(1));
