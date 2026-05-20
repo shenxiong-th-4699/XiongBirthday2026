@@ -252,7 +252,6 @@ a:hover { text-decoration: underline; }
 }
 .hero-art img {
   max-width: 100%;
-  width: clamp(150px, 85vw, 320px);
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 12px 16px rgba(255, 143, 182, .25));
