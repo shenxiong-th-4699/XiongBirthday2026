@@ -116,7 +116,7 @@ function isCommunityLoaded() {
 
 /* ---------- Bear-food helper (bonus motivator) ---------- */
 function calcBearFood(amount) {
-  const per = APP_CONFIG.donation.bahtPerFood || APP_CONFIG.donation.bahtPerMilk || 269;
+  const per = APP_CONFIG.donation.bahtPerFood || APP_CONFIG.donation.bahtPerMilk || 264;
   return Math.floor(amount / per);
 }
 
