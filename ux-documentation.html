@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UX Documentation — HBD XIONG 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* =====================================================
+       Design tokens (same as project)
+    ===================================================== */
+    :root {
+      --pink-50:  #FFF4F8;
+      --pink-100: #FFE4EE;
+      --pink-200: #FFC8DC;
+      --pink-300: #FFA9C7;
+      --pink-400: #FF8FB6;
+      --pink-500: #F472A4;
+      --pink-600: #DB5A8E;
+      --orange-50:  #FFF6EC;
+      --orange-100: #FFE7CE;
+      --orange-200: #FFD2A6;
+      --orange-300: #FFB97A;
+      --orange-400: #FFA053;
+      --orange-500: #FB8333;
+      --orange-600: #DC6916;
+      --cream: #FFFBF5;
+      --ink:      #3D3245;
+      --ink-soft: #6B6076;
+      --line:     #F1E6EE;
+      --green:    #2a8b3c;
+      --blue-soft:#e8f0fe;
+      --shadow-soft: 0 8px 24px -8px rgba(255,143,182,.30);
+      --radius:    22px;
+      --radius-sm: 14px;
+      --font-cute: "Mali", system-ui, sans-serif;
+      --font-body: "Mali", "Quicksand", system-ui, sans-serif;
+    }
+
+    /* =====================================================
+       Base
+    ===================================================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, var(--pink-100) 0, transparent 40%),
+        radial-gradient(circle at 100% 0%, var(--orange-100) 0, transparent 40%),
+        var(--cream);
+      background-attachment: fixed;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    a { color: var(--pink-600); text-decoration: none; }
+
+    /* =====================================================
+       Layout
+    ===================================================== */
+    .doc-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    /* =====================================================
+       Cover
+    ===================================================== */
+    .cover {
+      background: linear-gradient(135deg, #fff 0%, var(--pink-50) 50%, var(--orange-50) 100%);
+      border: 1px solid white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 40px 36px 32px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: "🐻";
+      position: absolute;
+      font-size: 180px;
+      right: -20px; top: -20px;
+      opacity: .06;
+      pointer-events: none;
+    }
+    .cover-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--pink-100);
+      color: var(--pink-600);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+      letter-spacing: .5px;
+    }
+    .cover h1 {
+      font-family: var(--font-cute);
+      font-size: clamp(26px, 4vw, 38px);
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+    .cover h1 span { color: var(--pink-500); }
+    .cover-sub {
+      color: var(--ink-soft);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+    .cover-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    .meta-chip strong { color: var(--ink); }
+
+    /* =====================================================
+       Section heading
+    ===================================================== */
+    .section-title {
+      font-family: var(--font-cute);
+      font-size: 22px;
+      color: var(--ink);
+      margin: 44px 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--pink-200), transparent);
+      border-radius: 999px;
+    }
+
+    /* =====================================================
+       Flow diagram
+    ===================================================== */
+    .flow-wrap {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--line);
+      padding: 28px 24px;
+      overflow-x: auto;
+      margin-bottom: 8px;
+    }
+    .flow-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: 760px;
+    }
+    .flow-node {
+      flex-shrink: 0;
+      text-align: center;
+      width: 120px;
+    }
+    .flow-box {
+      background: linear-gradient(135deg, var(--pink-50), var(--orange-50));
+      border: 2px solid var(--pink-200);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      position: relative;
+      cursor: default;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .flow-box:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+    .flow-box .flow-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+    .flow-box .flow-label { font-size: 11px; color: var(--ink-soft); margin-top: 2px; display: block; }
+    .flow-box.active {
+      background: linear-gradient(135deg, var(--pink-400), var(--orange-400));
+      border-color: transparent;
+      color: white;
+    }
+    .flow-box.active .flow-label { color: rgba(255,255,255,.8); }
+    .flow-arrow {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 0 2px;
+    }
+    .flow-arrow-line {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--pink-300), var(--orange-300));
+      position: relative;
+    }
+    .flow-arrow-line::after {
+      content: "▶";
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--orange-400);
+    }
+    .flow-arrow-label {
+      font-size: 10px;
+      color: var(--ink-soft);
+      text-align: center;
+    }
+    /* back arrow row */
+    .flow-back-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: 760px;
+      margin-top: 4px;
+    }
+    .flow-back-spacer { flex: 1; }
+    .flow-back-arc {
+      flex: 3;
+      border: 1.5px dashed var(--pink-300);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      height: 14px;
+      position: relative;
+      margin: 0 2px;
+    }
+    .flow-back-arc-label {
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--pink-400);
+      white-space: nowrap;
+    }
+    .flow-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+    .flow-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* =====================================================
+       Page cards grid
+    ===================================================== */
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .page-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .page-card-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .page-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .page-icon.pink { background: linear-gradient(135deg, var(--pink-100), var(--pink-200)); }
+    .page-icon.orange { background: linear-gradient(135deg, var(--orange-100), var(--orange-200)); }
+    .page-icon.green { background: #e8f7ec; }
+    .page-card-title { font-family: var(--font-cute); font-size: 17px; font-weight: 700; }
+    .page-card-url {
+      font-size: 11px;
+      color: var(--ink-soft);
+      background: var(--pink-50);
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin-top: 3px;
+      display: inline-block;
+      font-family: monospace;
+    }
+    .page-card-body { padding: 16px 20px; flex: 1; }
+
+    /* Screen mockup */
+    .mockup {
+      background: var(--pink-50);
+      border: 1.5px solid var(--pink-100);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+    .mockup-topbar {
+      background: rgba(255,251,245,.9);
+      border: 1px solid var(--line);
+      border-radius: 8px 8px 0 0;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .mockup-body { display: flex; flex-direction: column; gap: 6px; }
+    .mock-block {
+      background: white;
+      border-radius: 8px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--ink-soft);
+    }
+    .mock-block.pink-bg { background: var(--pink-100); border-color: var(--pink-200); color: var(--pink-600); }
+    .mock-block.orange-bg { background: var(--orange-50); border-color: var(--orange-100); color: var(--orange-600); }
+    .mock-block.hero-bg {
+      background: linear-gradient(135deg, var(--pink-100), var(--orange-100));
+      border-color: transparent;
+      color: var(--ink);
+    }
+    .mock-block strong { display: block; color: var(--ink); font-size: 12px; margin-bottom: 2px; }
+    .mock-row {
+      display: flex;
+      gap: 6px;
+    }
+    .mock-row .mock-block { flex: 1; }
+    .mock-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--pink-400), var(--orange-400));
+      color: white;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .mock-btn.ghost {
+      background: white;
+      color: var(--pink-600);
+      border: 1px solid var(--pink-200);
+    }
+    .mock-btn.black {
+      background: #0f1419;
+      color: white;
+    }
+    .mock-input {
+      border: 1.5px solid var(--orange-300);
+      background: white;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11px;
+      color: var(--ink-soft);
+      width: 100%;
+      margin-top: 4px;
+    }
+    .mock-progress {
+      height: 8px;
+      background: var(--pink-100);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .mock-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--pink-300), var(--orange-400));
+      border-radius: 999px;
+    }
+    .mock-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-300), var(--orange-300));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: white;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .mock-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 12px 4px 4px;
+    }
+    .mock-profile-text { font-size: 11px; }
+    .mock-profile-name { font-weight: 700; color: var(--ink); display: block; }
+    .mock-profile-handle { color: var(--ink-soft); }
+    .mock-bear-game {
+      background: linear-gradient(160deg, #FFF2F8, #FFF6EC, #FFEAF2);
+      border: 1.5px solid var(--pink-200);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      font-size: 28px;
+    }
+    .mock-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--pink-50);
+      border: 1px solid var(--pink-100);
+      border-radius: 999px;
+      padding: 3px;
+    }
+    .mock-tab {
+      flex: 1;
+      text-align: center;
+      padding: 4px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      color: var(--ink-soft);
+      font-weight: 600;
+    }
+    .mock-tab.active {
+      background: white;
+      color: var(--pink-600);
+      box-shadow: 0 2px 6px -2px rgba(255,143,182,.3);
+    }
+    .mock-qr {
+      width: 60px; height: 60px;
+      border: 2px solid var(--orange-200);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      background: white;
+    }
+
+    /* Elements list */
+    .elem-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .elem-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .elem-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .tag-input  { background: #e8f0fe; color: #1a56db; }
+    .tag-action { background: var(--pink-100); color: var(--pink-600); }
+    .tag-display { background: var(--orange-50); color: var(--orange-600); }
+    .tag-nav    { background: #e8f7ec; color: var(--green); }
+    .tag-api    { background: #fef3c7; color: #92400e; }
+    .tag-cond   { background: #f3e8ff; color: #7c3aed; }
+
+    /* Navigation map */
+    .nav-from {
+      background: var(--pink-50);
+      border: 1px solid var(--pink-100);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-top: 12px;
+    }
+    .nav-from-title { font-size: 11px; font-weight: 700; color: var(--pink-600); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--ink-soft);
+      padding: 3px 0;
+    }
+    .nav-arrow { color: var(--pink-400); font-size: 14px; }
+
+    /* States section */
+    .states-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .state-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid;
+    }
+    .state-chip.default  { background: var(--pink-50);   border-color: var(--pink-200);   color: var(--pink-600); }
+    .state-chip.loading  { background: #fef3c7; border-color: #fcd34d; color: #92400e; }
+    .state-chip.success  { background: #e8f7ec; border-color: #6ee7b7; color: var(--green); }
+    .state-chip.error    { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+    .state-chip.disabled { background: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; }
+
+    /* Step badge */
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink-400), var(--orange-400));
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-badge.done { background: var(--green); }
+
+    /* Wizard preview */
+    .wizard-steps {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 10px;
+      font-size: 10px;
+    }
+    .wz-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+    .wz-num {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--line);
+      color: var(--ink-soft);
+      font-weight: 700;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 3px;
+    }
+    .wz-num.active { background: linear-gradient(135deg, var(--pink-400), var(--orange-400)); color: white; }
+    .wz-num.done { background: var(--green); color: white; }
+    .wz-line {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: var(--line);
+      z-index: 0;
+    }
+    .wz-line.done { background: linear-gradient(90deg, var(--pink-300), var(--orange-300)); }
+
+    /* Callout */
+    .callout {
+      display: flex;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .callout.info  { background: var(--blue-soft); border-left: 3px solid #3b82f6; }
+    .callout.warn  { background: #fef3c7; border-left: 3px solid #f59e0b; }
+    .callout.tip   { background: var(--pink-50); border-left: 3px solid var(--pink-400); }
+    .callout-icon  { font-size: 16px; flex-shrink: 0; }
+    .callout-text  { color: var(--ink); line-height: 1.5; }
+    .callout-text strong { font-weight: 700; }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--line); margin: 8px 0; }
+
+    /* Full-width card */
+    .full-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--line);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .full-card h3 {
+      font-family: var(--font-cute);
+      font-size: 17px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Component table */
+    .comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .comp-table th {
+      background: var(--pink-50);
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 700;
+      color: var(--pink-600);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .comp-table td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table tr:hover td { background: var(--pink-50); }
+
+    /* Footer */
+    .doc-footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      text-align: center;
+      font-size: 12px;
+      color: var(--ink-soft);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .pages-grid { grid-template-columns: 1fr; }
+      .cover { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="doc-wrap">
+
+  <!-- ==================== COVER ==================== -->
+  <div class="cover">
+    <div class="cover-badge">📄 UX Documentation</div>
+    <h1>HBD XIONG <span>2026</span> 🐻</h1>
+    <p class="cover-sub">CSR เลี้ยงอุปการะหมี — เอกสารสำหรับทีม UX/UI</p>
+    <div class="cover-meta">
+      <span class="meta-chip">📁 <strong>3 หน้า</strong> หลัก</span>
+      <span class="meta-chip">🧭 <strong>4-step</strong> Donation Wizard</span>
+      <span class="meta-chip">🎨 Design System: Pink × Orange</span>
+      <span class="meta-chip">📱 Mobile-first</span>
+      <span class="meta-chip">🗓️ Version 2026-05-17</span>
+    </div>
+  </div>
+
+  <!-- ==================== FLOW OVERVIEW ==================== -->
+  <h2 class="section-title">🧭 Overview Flow</h2>
+
+  <div class="flow-wrap">
+    <!-- Main flow -->
+    <div class="flow-row">
+      <div class="flow-node">
+        <div class="flow-box">
+          <span class="flow-icon">🏠</span>
+          <strong>หน้าหลัก</strong>
+          <span class="flow-label">index.html</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="flow-arrow-line"></div>
+        <div class="flow-arrow-label">กด "แจ้งโดเนท"</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <span class="flow-icon">𝕏</span>
+          <strong>Step 1</strong>
+          <span class="flow-label">ระบุตัวตน</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="flow-arrow-line"></div>
+        <div class="flow-arrow-label">login สำเร็จ</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box active">
+          <span class="flow-icon">🍯</span>
+          <strong>Step 2</strong>
+          <span class="flow-label">ตักอาหาร</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="flow-arrow-line"></div>
+        <div class="flow-arrow-label">เลือกยอด</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <span class="flow-icon">💳</span>
+          <strong>Step 3</strong>
+          <span class="flow-label">ช่องทางโอน</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="flow-arrow-line"></div>
+        <div class="flow-arrow-label">โอนแล้ว</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <span class="flow-icon">📎</span>
+          <strong>Step 4</strong>
+          <span class="flow-label">แนบสลิป</span>
+        </div>
+      </div>
+      <div class="flow-arrow">
+        <div class="flow-arrow-line"></div>
+        <div class="flow-arrow-label">ยืนยัน</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box" style="background:linear-gradient(135deg,#e8f7ec,#d1fae5);border-color:#6ee7b7;">
+          <span class="flow-icon">💖</span>
+          <strong>Thank You</strong>
+          <span class="flow-label">thank-you.html</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back arrows hint -->
+    <div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12px;color:var(--ink-soft);display:flex;gap:20px;flex-wrap:wrap;">
+      <span>↩️ Step 3 มีปุ่ม <strong>← ย้อนกลับ</strong> ไป Step 2</span>
+      <span>↩️ Step 4 มีปุ่ม <strong>← ย้อนกลับ</strong> ไป Step 3</span>
+      <span>🔓 logout ได้ที่ Step 2, 3, 4 → กลับ Step 1</span>
+    </div>
+
+    <!-- Legend -->
+    <div class="flow-legend">
+      <div class="flow-legend-item">
+        <div class="legend-dot" style="background:linear-gradient(135deg,var(--pink-400),var(--orange-400))"></div>
+        <span>หน้าปัจจุบัน (active step)</span>
+      </div>
+      <div class="flow-legend-item">
+        <div class="legend-dot" style="background:var(--pink-100)"></div>
+        <span>หน้าอื่น ๆ</span>
+      </div>
+      <div class="flow-legend-item">
+        <div class="legend-dot" style="background:#6ee7b7"></div>
+        <span>หน้าสุดท้าย (success)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PAGES ==================== -->
+  <h2 class="section-title">📄 รายละเอียดแต่ละหน้า</h2>
+
+  <div class="pages-grid">
+
+    <!-- ========== PAGE: index.html ========== -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div class="page-icon pink">🏠</div>
+        <div>
+          <div class="page-card-title">หน้าหลัก</div>
+          <span class="page-card-url">index.html</span>
+        </div>
+      </div>
+      <div class="page-card-body">
+        <!-- Mockup -->
+        <div class="mockup">
+          <div class="mockup-topbar">
+            <span>🐻 HBD XIONG 2026</span>
+            <span style="background:linear-gradient(135deg,var(--pink-400),var(--orange-400));color:white;border-radius:999px;padding:2px 8px;font-size:10px;">แจ้งโดเนท 💌</span>
+          </div>
+          <div class="mockup-body">
+            <div class="mock-row">
+              <div class="mock-block" style="flex:1.2">
+                <strong>📊 ยอดสะสมรวม</strong>
+                <div style="font-size:20px;font-weight:700;color:var(--pink-500);">฿12,500</div>
+                <div class="mock-progress"><div class="mock-progress-fill" style="width:65%"></div></div>
+                <div style="margin-top:4px;color:var(--ink-soft);">⏱ Countdown</div>
+              </div>
+              <div class="mock-block" style="flex:1">
+                <strong>💖 Wall of Love</strong>
+                <div style="color:var(--ink-soft);line-height:1.8;">
+                  @fanA ฿500<br>@fanB ฿269<br>@fanC ฿1,000
+                </div>
+              </div>
+            </div>
+            <div class="mock-block hero-bg">
+              <strong>Hero Section</strong>
+              <div>ของขวัญวันเกิด <strong>XIONG</strong><br>คือน้องหมี 💖</div>
+              <div style="margin-top:6px;">
+                <span class="mock-btn">แจ้งโดเนท</span>
+                <span class="mock-btn ghost" style="margin-left:4px;">ดูวิธีโดเนท</span>
+              </div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-block"><strong>📋 วิธีร่วมโดเนท</strong><div>4 ขั้นตอน</div></div>
+              <div class="mock-block"><strong>🐾 เกี่ยวกับโครงการ</strong><div>CSR หมี 120 ตัว</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Elements -->
+        <ul class="elem-list">
+          <li><span class="elem-tag tag-display">แสดง</span> ยอดรวม + progress bar + % เป้าหมาย</li>
+          <li><span class="elem-tag tag-display">แสดง</span> Countdown หมดเขต (real-time)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> Wall of Love รายชื่อผู้โดเนท (paginated)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> จำนวนอาหารน้องหมีสะสม (กิโล)</li>
+          <li><span class="elem-tag tag-action">กดได้</span> ปุ่ม "แจ้งโดเนท" → donate.html</li>
+          <li><span class="elem-tag tag-api">API</span> GET /getDonationAll (grand_total + รายการ)</li>
+        </ul>
+        <div class="nav-from">
+          <div class="nav-from-title">นำทางไป</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> donate.html (ปุ่มแจ้งโดเนท)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== STEP 1: X Login ========== -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div class="page-icon pink">𝕏</div>
+        <div>
+          <div class="page-card-title">Step 1 — ระบุตัวตน</div>
+          <span class="page-card-url">donate.html</span>
+        </div>
+      </div>
+      <div class="page-card-body">
+        <div class="mockup">
+          <div class="mockup-topbar">
+            <span>🐻 HBD XIONG 2026</span>
+            <span style="color:var(--ink-soft);font-size:10px;">← กลับหน้าหลัก</span>
+          </div>
+          <!-- Wizard -->
+          <div class="wizard-steps">
+            <div class="wz-step">
+              <div class="wz-num active">1</div>
+              <div>ระบุตัวตน</div>
+            </div>
+            <div class="wz-step">
+              <div class="wz-line"></div>
+              <div class="wz-num">2</div>
+              <div>ตักอาหาร</div>
+            </div>
+            <div class="wz-step">
+              <div class="wz-line"></div>
+              <div class="wz-num">3</div>
+              <div>ช่องทางโอน</div>
+            </div>
+            <div class="wz-step">
+              <div class="wz-line"></div>
+              <div class="wz-num">4</div>
+              <div>แนบสลิป</div>
+            </div>
+          </div>
+          <div class="mockup-body">
+            <div class="mock-block" style="text-align:center;">
+              <strong style="font-size:14px;">𝕏 เชื่อมต่อบัญชี X</strong>
+              <div style="margin:6px 0;color:var(--ink-soft);">เราจะดึง handle ของคุณเพื่อยืนยัน</div>
+              <span class="mock-btn black" style="display:block;text-align:center;margin-top:6px;">𝕏 เข้าสู่ระบบด้วย X</span>
+            </div>
+            <div class="mock-block" style="text-align:center;font-size:11px;color:var(--ink-soft);">
+              ไม่สามารถเข้าสู่ระบบได้? → <strong>กรอก @account เอง</strong> (collapsible)
+            </div>
+          </div>
+        </div>
+        <ul class="elem-list">
+          <li><span class="elem-tag tag-action">กดได้</span> ปุ่ม "เข้าสู่ระบบด้วย X" (Firebase Auth)</li>
+          <li><span class="elem-tag tag-input">กรอก</span> @account แบบ manual (fallback)</li>
+          <li><span class="elem-tag tag-cond">เงื่อนไข</span> ถ้ามี session อยู่แล้ว → ข้าม Step 1 ทันที</li>
+          <li><span class="elem-tag tag-api">API</span> GET /getUserInfoByXid · POST /saveUser</li>
+        </ul>
+        <div class="callout tip">
+          <span class="callout-icon">💡</span>
+          <div class="callout-text">ถ้า X Auth ล้มเหลว จะ auto-expand ช่อง manual @handle ให้อัตโนมัติ</div>
+        </div>
+        <div class="nav-from">
+          <div class="nav-from-title">นำทางไป</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> Step 2 (login สำเร็จ)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== STEP 2: ตักอาหาร ========== -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div class="page-icon orange">🍯</div>
+        <div>
+          <div class="page-card-title">Step 2 — เลือกจำนวนโดเนท</div>
+          <span class="page-card-url">donate.html</span>
+        </div>
+      </div>
+      <div class="page-card-body">
+        <div class="mockup">
+          <div class="mockup-body">
+            <div class="mock-profile">
+              <div class="mock-avatar">S</div>
+              <div class="mock-profile-text">
+                <span class="mock-profile-name">Shen Xiong P.</span>
+                <span class="mock-profile-handle">@ShenXiong_TH_fc</span>
+              </div>
+            </div>
+            <div class="mock-block" style="text-align:center;padding:12px 8px;">
+              <div style="font-size:11px;color:var(--ink-soft);">ยอดโดเนท</div>
+              <div style="font-size:28px;font-weight:700;color:var(--orange-500);">฿269</div>
+              <div style="font-size:10px;color:var(--ink-soft);">🥄 1 ตัก = <strong>฿46</strong> &nbsp;·&nbsp; 🐻 1 กิโล = <strong>฿269</strong></div>
+            </div>
+            <div class="mock-tabs">
+              <div class="mock-tab active">🍯 ตักอาหาร</div>
+              <div class="mock-tab">✏️ กรอกเอง</div>
+            </div>
+            <div class="mock-bear-game">🥄 🐻<br><span style="font-size:12px;display:block;margin-top:4px;"><span class="mock-btn" style="font-size:11px;padding:4px 16px;">🐾 ตัก!</span></span></div>
+            <div class="mock-row">
+              <span class="mock-btn ghost">เริ่มใหม่</span>
+              <span class="mock-btn" style="flex:1;text-align:center;">ดำเนินการต่อ → (฿269)</span>
+            </div>
+          </div>
+        </div>
+        <ul class="elem-list">
+          <li><span class="elem-tag tag-display">แสดง</span> Profile bar (ชื่อ + handle + logout)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> ยอดเงิน real-time (อัปเดตทุกครั้งที่ตัก)</li>
+          <li><span class="elem-tag tag-action">กดได้</span> Tab "🍯 ตักอาหาร" — เล่นเกมสุ่มยอด</li>
+          <li><span class="elem-tag tag-input">กรอก</span> Tab "✏️ กรอกเอง" — ระบุยอดเอง (default 269)</li>
+          <li><span class="elem-tag tag-action">กดได้</span> ปุ่ม "ตัก!" — random +30~150 กรัม</li>
+          <li><span class="elem-tag tag-action">กดได้</span> เริ่มใหม่ — reset ยอด</li>
+        </ul>
+        <div class="callout tip">
+          <span class="callout-icon">🎮</span>
+          <div class="callout-text"><strong>เกมตัก:</strong> ทุก 1,000 g = 1 กิโล = ฿269 บาท progress bar แสดงชามปัจจุบัน</div>
+        </div>
+        <div class="nav-from">
+          <div class="nav-from-title">นำทางไป</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> Step 3 (กด "ดำเนินการต่อ")</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> Step 1 (กด logout)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== STEP 3: Payment ========== -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div class="page-icon pink">💳</div>
+        <div>
+          <div class="page-card-title">Step 3 — ช่องทางการโอน</div>
+          <span class="page-card-url">donate.html</span>
+        </div>
+      </div>
+      <div class="page-card-body">
+        <div class="mockup">
+          <div class="mockup-body">
+            <div class="mock-profile">
+              <div class="mock-avatar">S</div>
+              <div class="mock-profile-text">
+                <span class="mock-profile-name">Shen Xiong P.</span>
+                <span class="mock-profile-handle">@ShenXiong_TH_fc</span>
+              </div>
+            </div>
+            <div class="mock-block orange-bg" style="text-align:center;padding:10px;">
+              🐾 ยอดโดเนทของคุณ <strong style="font-size:18px;color:var(--orange-600);">฿269</strong>
+              <div style="font-size:10px;color:var(--ink-soft);">โอนยอดอื่นก็ได้ ระบบอ่านยอดจากสลิป</div>
+            </div>
+            <div class="mock-row">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+                <div class="mock-qr">🔲</div>
+                <div style="font-size:10px;color:var(--ink-soft);">QR PromptPay</div>
+              </div>
+              <div class="mock-block" style="flex:1">
+                <strong>ธนาคาร</strong>
+                <div>กสิกรไทย</div>
+                <div style="margin-top:4px;"><strong>เลขบัญชี</strong></div>
+                <div>231-1-16674-6 <span style="color:var(--pink-600);font-size:10px;">คัดลอก</span></div>
+                <div style="font-size:10px;color:var(--ink-soft);margin-top:4px;">💡 269 บาท = 1 กิโล</div>
+              </div>
+            </div>
+            <div class="mock-row">
+              <span class="mock-btn ghost">← ย้อนกลับ</span>
+              <span class="mock-btn" style="flex:1;text-align:center;">โอนเรียบร้อยแล้ว →</span>
+            </div>
+          </div>
+        </div>
+        <ul class="elem-list">
+          <li><span class="elem-tag tag-display">แสดง</span> ยอดแนะนำจาก Step 2 (ถ้ามี)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> QR PromptPay (รูปภาพ)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> ชื่อบัญชี / เลขบัญชี / ธนาคาร</li>
+          <li><span class="elem-tag tag-action">กดได้</span> คัดลอกเลขบัญชี → clipboard</li>
+          <li><span class="elem-tag tag-action">กดได้</span> ← ย้อนกลับ → Step 2</li>
+          <li><span class="elem-tag tag-action">กดได้</span> "โอนเรียบร้อย" → Step 4</li>
+        </ul>
+        <div class="nav-from">
+          <div class="nav-from-title">นำทางไป</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> Step 4 (กด "โอนเรียบร้อย")</div>
+          <div class="nav-item"><span class="nav-arrow">←</span> Step 2 (ย้อนกลับ)</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> Step 1 (logout)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== STEP 4: Slip Upload ========== -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div class="page-icon orange">📎</div>
+        <div>
+          <div class="page-card-title">Step 4 — แนบสลิป</div>
+          <span class="page-card-url">donate.html</span>
+        </div>
+      </div>
+      <div class="page-card-body">
+        <div class="mockup">
+          <div class="mockup-body">
+            <div class="mock-block" style="text-align:center;border:2px dashed var(--orange-300);padding:14px;">
+              <div style="font-size:22px;">📎</div>
+              <strong>คลิกเพื่ออัปโหลดสลิป</strong>
+              <div style="font-size:10px;color:var(--ink-soft);">ระบบอ่านยอดอัตโนมัติ</div>
+              <div style="font-size:10px;color:var(--ink-soft);">รองรับ jpg, png, pdf</div>
+            </div>
+            <div class="mock-row">
+              <div class="mock-block" style="text-align:center;padding:8px;">
+                <div style="font-size:28px;">🖼️</div>
+                <div style="font-size:10px;color:var(--ink-soft);">preview</div>
+              </div>
+              <div class="mock-block" style="flex:1">
+                <strong style="color:var(--green);">✅ ตรวจพบสลิป</strong>
+                <div>ยอด: ฿269</div>
+                <div>ผู้รับ: น.ส.วาษิฬา</div>
+                <div>เวลา: 20:15</div>
+              </div>
+            </div>
+            <div class="mock-block">
+              <strong>ชื่อที่แสดงบน Wall of Love</strong>
+              <div class="mock-input">Shen Xiong Fan</div>
+            </div>
+            <div class="mock-row">
+              <span class="mock-btn ghost">← ย้อนกลับ</span>
+              <span class="mock-btn" style="flex:1;text-align:center;">ยืนยันการโดเนท</span>
+            </div>
+          </div>
+        </div>
+        <ul class="elem-list">
+          <li><span class="elem-tag tag-input">อัปโหลด</span> สลิป (jpg/png/pdf) via file picker</li>
+          <li><span class="elem-tag tag-api">API</span> POST n8n OCR → อ่านยอด/ผู้รับ/เวลา</li>
+          <li><span class="elem-tag tag-api">API</span> POST Google Drive → อัปโหลดสลิป (background)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> Preview สลิป + ผลการ OCR</li>
+          <li><span class="elem-tag tag-cond">เงื่อนไข</span> ปุ่มยืนยัน disabled จนกว่า OCR จะผ่าน</li>
+          <li><span class="elem-tag tag-input">กรอก</span> ชื่อที่แสดงบน Wall of Love</li>
+          <li><span class="elem-tag tag-api">API</span> POST /saveDonate → บันทึกลงฐานข้อมูล</li>
+        </ul>
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div class="callout-text">ถ้า OCR อ่านสลิปไม่ได้ → แสดงปุ่ม <strong>"กรอกยอดเอง"</strong> ให้ user ยืนยันเอง</div>
+        </div>
+        <div class="nav-from">
+          <div class="nav-from-title">นำทางไป</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> thank-you.html (ยืนยันสำเร็จ)</div>
+          <div class="nav-item"><span class="nav-arrow">←</span> Step 3 (ย้อนกลับ)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== THANK YOU ========== -->
+    <div class="page-card">
+      <div class="page-card-header">
+        <div class="page-icon green">💖</div>
+        <div>
+          <div class="page-card-title">หน้าขอบคุณ</div>
+          <span class="page-card-url">thank-you.html</span>
+        </div>
+      </div>
+      <div class="page-card-body">
+        <div class="mockup">
+          <div class="mockup-body">
+            <div class="mock-block" style="background:linear-gradient(135deg,var(--pink-50),var(--orange-50));text-align:center;padding:14px;">
+              <div style="font-size:13px;">
+                <span style="font-size:28px;">🥣</span> <span style="font-size:44px;">🐻</span><br>
+                <div style="font-size:11px;color:var(--ink-soft);">🍓 🍯 🍎 (animation)</div>
+              </div>
+            </div>
+            <div class="mock-block" style="text-align:center;">
+              <div style="font-size:18px;font-weight:700;color:var(--pink-600);">ขอบคุณนะ 💖</div>
+              <div style="font-size:11px;color:var(--ink-soft);">เงินโดเนทจะถูกนำไปเป็นอาหารน้องหมี</div>
+            </div>
+            <div class="mock-block orange-bg" style="text-align:center;">
+              <div style="font-size:11px;color:var(--ink-soft);">โดเนทครั้งนี้</div>
+              <div style="font-size:24px;font-weight:700;color:var(--orange-600);">฿1,890</div>
+              <div class="divider"></div>
+              <div class="mock-row" style="text-align:center;gap:12px;justify-content:center;">
+                <div><div style="font-size:10px;">ยอดสะสม</div><strong>฿2,159</strong></div>
+                <div style="border-left:1px solid var(--orange-200);height:30px;"></div>
+                <div><div style="font-size:10px;">อาหารสะสม</div><strong>8 กิโล</strong></div>
+              </div>
+            </div>
+            <div class="mock-row" style="gap:6px;">
+              <span class="mock-btn black" style="font-size:10px;padding:4px 8px;">𝕏 แชร์</span>
+              <span class="mock-btn" style="flex:1;text-align:center;font-size:10px;">กลับหน้าหลัก</span>
+              <span class="mock-btn ghost" style="font-size:10px;padding:4px 8px;">โดเนทเพิ่ม</span>
+            </div>
+          </div>
+        </div>
+        <ul class="elem-list">
+          <li><span class="elem-tag tag-display">แสดง</span> Animation หมีรับอาหาร (bear-feeding)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> ยอดโดเนทครั้งนี้ (จาก sessionStorage)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> ยอดสะสมรวม + อาหารสะสม (กิโล)</li>
+          <li><span class="elem-tag tag-display">แสดง</span> รูปโปรไฟล์ X (ถ้ามี) หรือ initial</li>
+          <li><span class="elem-tag tag-action">กดได้</span> แชร์บน X → Twitter intent</li>
+          <li><span class="elem-tag tag-action">กดได้</span> กลับหน้าหลัก / โดเนทเพิ่ม</li>
+        </ul>
+        <div class="callout info">
+          <span class="callout-icon">ℹ️</span>
+          <div class="callout-text">ข้อมูลอ่านจาก <code>sessionStorage["hbd_xiong_last"]</code> ถ้าไม่มีข้อมูล → แสดง fallback state พร้อมปุ่มไปโดเนท</div>
+        </div>
+        <div class="nav-from">
+          <div class="nav-from-title">นำทางไป</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> index.html</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> donate.html (โดเนทเพิ่ม)</div>
+          <div class="nav-item"><span class="nav-arrow">→</span> X.com intent (แชร์)</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pages-grid -->
+
+  <!-- ==================== STATES ==================== -->
+  <h2 class="section-title">🔄 States & Edge Cases</h2>
+
+  <div class="full-card">
+    <h3>📊 Data States</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--pink-600);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Auth States</div>
+        <div class="states-grid">
+          <div class="state-chip default">ยังไม่ login</div>
+          <div class="state-chip loading">⏳ กำลัง login</div>
+          <div class="state-chip success">✅ login แล้ว</div>
+          <div class="state-chip error">❌ login ล้มเหลว</div>
+        </div>
+        <div class="callout tip" style="margin-top:8px;">
+          <span class="callout-icon">💡</span>
+          <div class="callout-text">ถ้า login ล้มเหลว → auto-expand manual @handle</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--pink-600);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Slip OCR States</div>
+        <div class="states-grid">
+          <div class="state-chip default">ยังไม่อัปโหลด</div>
+          <div class="state-chip loading">⏳ กำลังประมวลผล</div>
+          <div class="state-chip success">✅ OCR ผ่าน</div>
+          <div class="state-chip error">❌ OCR ไม่ผ่าน</div>
+          <div class="state-chip warn" style="background:#fef3c7;border-color:#f59e0b;color:#92400e;">✏️ manual mode</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--pink-600);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Step 2 Mode</div>
+        <div class="states-grid">
+          <div class="state-chip default">🍯 เกมตัก</div>
+          <div class="state-chip default">✏️ กรอกเอง</div>
+        </div>
+        <div class="callout tip" style="margin-top:8px;">
+          <span class="callout-icon">💡</span>
+          <div class="callout-text">โหมดกรอกเอง: default แสดง ฿269 (1 กิโล) ก่อนพิมพ์</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== COMPONENTS ==================== -->
+  <h2 class="section-title">🧩 Shared Components</h2>
+
+  <div class="full-card">
+    <h3>📦 Component Reference</h3>
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>ใช้ใน</th>
+          <th>รายละเอียด</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Profile Bar</strong></td>
+          <td>Step 2, 3, 4</td>
+          <td>แสดง avatar + ชื่อ + handle + ปุ่ม logout ครบทุก step</td>
+        </tr>
+        <tr>
+          <td><strong>Wizard Steps</strong></td>
+          <td>donate.html</td>
+          <td>4 วงกลม + progress line แสดง step ปัจจุบัน/ผ่านแล้ว</td>
+        </tr>
+        <tr>
+          <td><strong>Feeder Game</strong></td>
+          <td>Step 2</td>
+          <td>🥄 + 🐻 animation + ปุ่มตัก + bowl progress bar (0–1000g)</td>
+        </tr>
+        <tr>
+          <td><strong>Suggested Amount Box</strong></td>
+          <td>Step 3</td>
+          <td>แสดงเมื่อ Step 2 มียอด — "ยอดโดเนทของคุณ ฿XXX"</td>
+        </tr>
+        <tr>
+          <td><strong>File Drop Zone</strong></td>
+          <td>Step 4</td>
+          <td>click-to-upload · แสดง preview + filename + ขนาด</td>
+        </tr>
+        <tr>
+          <td><strong>Slip Result Box</strong></td>
+          <td>Step 4</td>
+          <td>แสดงผล OCR: ยอด / ผู้รับ / บัญชี / ธนาคาร / เลขอ้างอิง / เวลา</td>
+        </tr>
+        <tr>
+          <td><strong>Copy Button</strong></td>
+          <td>Step 3</td>
+          <td>คัดลอกเลขบัญชีไป clipboard พร้อม toast notification</td>
+        </tr>
+        <tr>
+          <td><strong>Toast</strong></td>
+          <td>ทุกหน้า</td>
+          <td>แจ้งเตือนชั่วคราว 2 วินาที (bottom center)</td>
+        </tr>
+        <tr>
+          <td><strong>Wall of Love</strong></td>
+          <td>index.html</td>
+          <td>รายการผู้โดเนท paginated (5/หน้า) เรียงล่าสุดก่อน</td>
+        </tr>
+        <tr>
+          <td><strong>Bear-feeding Anim</strong></td>
+          <td>thank-you.html</td>
+          <td>Avatar → bowl + bear + food bits flying (CSS animation)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==================== API MAP ==================== -->
+  <h2 class="section-title">🔌 API Endpoints</h2>
+
+  <div class="full-card">
+    <h3>📡 Backend calls</h3>
+    <table class="comp-table">
+      <thead>
+        <tr><th>Endpoint</th><th>Method</th><th>ใช้ใน</th><th>หมายเหตุ</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>/getDonationAll</code></td>
+          <td><span class="elem-tag tag-display">GET</span></td>
+          <td>index.html</td>
+          <td>ยอดรวม + รายการทั้งหมดสำหรับ Wall of Love</td>
+        </tr>
+        <tr>
+          <td><code>/getUserInfoByXid</code></td>
+          <td><span class="elem-tag tag-display">GET</span></td>
+          <td>Step 1</td>
+          <td>เช็ค user เดิม → ดึง user_id + ยอดสะสม</td>
+        </tr>
+        <tr>
+          <td><code>/saveUser</code></td>
+          <td><span class="elem-tag tag-action">POST</span></td>
+          <td>Step 1</td>
+          <td>สร้าง user ใหม่ถ้ายังไม่มี</td>
+        </tr>
+        <tr>
+          <td><code>/saveDonate</code></td>
+          <td><span class="elem-tag tag-action">POST</span></td>
+          <td>Step 4</td>
+          <td>บันทึกโดเนท (user_id, amount, slip_image, ref_code, …)</td>
+        </tr>
+        <tr>
+          <td><code>n8n webhook (OCR)</code></td>
+          <td><span class="elem-tag tag-action">POST</span></td>
+          <td>Step 4</td>
+          <td>ส่ง form-data image → รับ slip data (amount, bank, ref, …)</td>
+        </tr>
+        <tr>
+          <td><code>Google Apps Script</code></td>
+          <td><span class="elem-tag tag-action">POST</span></td>
+          <td>Step 4</td>
+          <td>อัปโหลดสลิปไป Google Drive (base64) — background call</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==================== DESIGN TOKENS ==================== -->
+  <h2 class="section-title">🎨 Design Tokens</h2>
+
+  <div class="full-card">
+    <h3>🖌️ สีหลัก</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--pink-500);box-shadow:0 4px 12px rgba(244,114,164,.4)"></div>
+        <span>Pink 500</span><span style="font-family:monospace;">#F472A4</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--pink-600);"></div>
+        <span>Pink 600</span><span style="font-family:monospace;">#DB5A8E</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--orange-500);box-shadow:0 4px 12px rgba(251,131,51,.4)"></div>
+        <span>Orange 500</span><span style="font-family:monospace;">#FB8333</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--pink-100);border:1px solid var(--pink-200)"></div>
+        <span>Pink 100</span><span style="font-family:monospace;">#FFE4EE</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--orange-50);border:1px solid var(--orange-100)"></div>
+        <span>Orange 50</span><span style="font-family:monospace;">#FFF6EC</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--ink);"></div>
+        <span>Ink</span><span style="font-family:monospace;">#3D3245</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--ink-soft);">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--ink-soft);"></div>
+        <span>Ink Soft</span><span style="font-family:monospace;">#6B6076</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:16px;">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">Typography</div>
+        <div style="font-size:13px;line-height:2;">
+          <div><strong>Font:</strong> Mali (Thai), Quicksand</div>
+          <div><strong>Heading:</strong> Mali 700</div>
+          <div><strong>Body:</strong> Mali 400–600</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">Border Radius</div>
+        <div style="font-size:13px;line-height:2;">
+          <div><strong>--radius:</strong> 22px (card)</div>
+          <div><strong>--radius-sm:</strong> 14px (inner block)</div>
+          <div><strong>Pill:</strong> 999px (button/chip)</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;">CTA Gradient</div>
+        <div style="border-radius:999px;background:linear-gradient(135deg,var(--pink-400),var(--orange-400));color:white;padding:8px 16px;font-weight:700;font-size:13px;text-align:center;">
+          Pink 400 → Orange 400
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="doc-footer">
+    <div>📄 UX Documentation — HBD XIONG 2026 · ShenXiong Thailand</div>
+    <div style="margin-top:4px;">เอกสารนี้สร้างสำหรับทีม UX/UI เพื่อ reference การออกแบบและ flow · ไม่ผูกกับ API</div>
+  </div>
+
+</div><!-- /doc-wrap -->
+</body>
+</html>
