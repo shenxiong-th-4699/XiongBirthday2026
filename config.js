@@ -118,8 +118,8 @@ const APP_CONFIG = {
   social: {
     twitter: "https://x.com/intent/tweet?text=",
     shareText:
-      "ร่วมโดเนทเลี้ยงอุปการะหมีเพื่อวันเกิด XIONG @ NexT1DE 🐻💖 #BearHugsForXIONG2026 #ShenXiongTH",
-    siteUrl: "https://hbd-xiong-2026.example",
+      "ร่วมโดเนทเลี้ยงอุปการะหมีเพื่อวันเกิด XIONG NexT1DE 🐻💖 #BearHugsForXIONG2026 #ShenXiongTH",
+    siteUrl: "https://shenxiong-th-4699.github.io/XiongBirthday2026/index.html",
   },
 
   // ----- Organization / footer credit -----
